@@ -1,0 +1,716 @@
+---
+import { servicesList, consultingPillars } from '../data/siteContent';
+import { imgSrc, imgSrcSet, imgFallback } from '../data/images';
+---
+
+<section id="servicios" class="section-pro services-section" aria-labelledby="services-heading">
+  <div class="container-pro">
+    <!-- Encabezado Centrado (max-width: 780px) -->
+    <div class="services-header" data-sw-reveal>
+      <span class="services-eyebrow">— NUESTROS SERVICIOS —</span>
+      <h2 id="services-heading" class="heading-h2 services-title">
+        Un solo aliado para <span class="text-accent">múltiples soluciones</span>
+      </h2>
+      <p class="services-subtitle">Soluciones integrales para cada necesidad</p>
+      <p class="services-intro">
+        Ofrecemos un portafolio de servicios orientado a los sectores residencial, comercial,
+        industrial, institucional y público. Integramos diferentes especialidades para brindar
+        alternativas adaptadas a los requerimientos de cada proyecto, con atención profesional y
+        compromiso con la calidad.
+      </p>
+    </div>
+
+    <!-- Grid Principal: 3 columnas x 2 filas en Desktop / Carrusel Snap en Móvil -->
+    <div class="services-grid" data-services-carousel>
+      {
+        servicesList.map((service, idx) => (
+          <article
+            class="service-card"
+            data-service-card
+            data-sw-reveal
+            style={`--sw-delay: ${(idx % 3) * 80}ms`}
+          >
+            <!-- Imagen Superior con recorte curvo suave en la base -->
+            <div class="service-media-wrap">
+              <div class="service-img-clip">
+                <img
+                  src={imgSrc(service.image, 1280)}
+                  srcset={imgSrcSet(service.image)}
+                  sizes="(min-width: 1080px) 400px, (min-width: 768px) 50vw, 85vw"
+                  width="1280"
+                  height="853"
+                  data-fallback={service.fallbackImage}
+                  alt={service.imageAlt}
+                  class="service-img"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div class="service-img-overlay"></div>
+              </div>
+
+              <!-- Curva Inferior SVG Suave -->
+              <svg
+                class="service-curve"
+                viewBox="0 0 400 32"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <path d="M0,32 L0,8 Q200,36 400,6 L400,32 Z" fill="#FFFFFF" />
+              </svg>
+
+              <!-- Ícono Circular Flotante (Intercalando #0A2239 y #FF6B00 con borde blanco 3px) -->
+              <div
+                class:list={[
+                  'service-floating-icon',
+                  service.accentColor === 'accent' ? 'bg-accent' : 'bg-primary',
+                ]}
+                aria-hidden="true"
+              >
+                {service.iconName === 'architecture' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 3-8 18" />
+                    <path d="m12 3 8 18" />
+                    <circle cx="12" cy="3" r="1.5" />
+                    <path d="M7 14h10" />
+                    <path d="M12 10v6" />
+                  </svg>
+                )}
+                {service.iconName === 'construction' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z" />
+                    <path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5" />
+                    <path d="M4 15v-3a6 6 0 0 1 6-6h0" />
+                    <path d="M14 6h0a6 6 0 0 1 6 6v3" />
+                  </svg>
+                )}
+                {service.iconName === 'maintenance' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                )}
+                {service.iconName === 'graphics' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="3" width="20" height="14" rx="2" />
+                    <path d="M8 21h8" />
+                    <path d="M12 17v4" />
+                    <path d="m7 11 3-3 3 3 4-4" />
+                  </svg>
+                )}
+                {service.iconName === 'environment' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                  </svg>
+                )}
+                {service.iconName === 'logistics' && (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                    <path d="m3.3 7 8.7 5 8.7-5" />
+                    <path d="M12 22V12" />
+                  </svg>
+                )}
+              </div>
+            </div>
+
+            <!-- Cuerpo de la Tarjeta -->
+            <div class="service-body">
+              <h3 class="heading-h3 service-card-title">{service.title}</h3>
+              <p class="service-card-desc">{service.description}</p>
+
+              <!-- Píldoras (Tags) de Especialidades -->
+              <ul class="service-tags" aria-label={`Especialidades de ${service.title}`}>
+                {service.tags.map((tag) => (
+                  <li class="service-tag">{tag}</li>
+                ))}
+              </ul>
+
+              <!-- Enlace Inferior con Botón Circular de Flecha -->
+              <div class="service-footer">
+                <a
+                  href="#contacto"
+                  class="service-cta-link"
+                  data-select-service={service.selectValue}
+                >
+                  <span>Conocer servicios</span>
+                  <span class="service-arrow-btn" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14" />
+                      <path d="m12 5 7 7-7 7" />
+                    </svg>
+                  </span>
+                </a>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Indicadores de Swipe en Móvil (< 768px) -->
+    <div class="carousel-dots" aria-label="Navegación de tarjetas de servicio">
+      {
+        servicesList.map((service, idx) => (
+          <button
+            type="button"
+            class:list={['carousel-dot', { 'is-active': idx === 0 }]}
+            aria-label={`Ver ${service.title}`}
+            data-carousel-dot={idx}
+          />
+        ))
+      }
+    </div>
+
+    <!-- 3.4 Sub-sección Complementaria: Franja de Consultoría y Asesoría Técnica -->
+    <div class="consulting-banner" data-sw-reveal>
+      <!-- Izquierda (35%): Fotografía corporativa con corte diagonal a la derecha -->
+      <div class="consulting-media">
+        <img
+          src={imgSrc('consultoria-tecnica', 1280)}
+          srcset={imgSrcSet('consultoria-tecnica')}
+          sizes="(min-width: 1024px) 35vw, 100vw"
+          width="1280"
+          height="853"
+          data-fallback={imgFallback('consultoria-tecnica')}
+          alt="Equipo de ingenieros y consultores de 360° Pro realizando supervisión e interventoría técnica en obra"
+          class="consulting-img"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+
+      <!-- Derecha (65%): Contenido informativo + 4 pilares + CTA -->
+      <div class="consulting-content">
+        <div class="consulting-title-row">
+          <span class="consulting-icon-badge" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </span>
+          <h3 class="consulting-h3">
+            CONSULTORÍA Y <span class="text-accent">ASESORÍA TÉCNICA</span>
+          </h3>
+        </div>
+
+        <p class="consulting-subtitle">
+          Experiencia y conocimiento para impulsar tus proyectos.
+        </p>
+
+        <p class="consulting-desc">
+          Ofrecemos acompañamiento profesional en formulación, estructuración, evaluación,
+          supervisión y gestión de proyectos para empresas y entidades públicas y privadas.
+        </p>
+
+        <div class="consulting-bottom-row">
+          <!-- 4 Íconos de Especialidad separados por líneas verticales sutiles -->
+          <ul class="consulting-pillars">
+            {
+              consultingPillars.map((pillar) => (
+                <li class="consulting-pillar">
+                  <span class="pillar-icon" aria-hidden="true">
+                    {pillar.icon === 'clipboard' && (
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="8" y="2" width="8" height="4" rx="1" />
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                        <path d="M9 12h6" />
+                        <path d="M9 16h6" />
+                      </svg>
+                    )}
+                    {pillar.icon === 'chart' && (
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 3v18h18" />
+                        <path d="m19 9-5 5-4-4-3 3" />
+                      </svg>
+                    )}
+                    {pillar.icon === 'shield-check' && (
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                    )}
+                    {pillar.icon === 'compass' && (
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                      </svg>
+                    )}
+                  </span>
+                  <span class="pillar-label">{pillar.title}</span>
+                </li>
+              ))
+            }
+          </ul>
+
+          <a
+            href="#contacto"
+            class="btn-primary-pro consulting-cta"
+            data-select-service="Consultoría y Asesoría Técnica"
+          >
+            <span>Conocer nuestros servicios</span>
+            <span aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .services-section {
+    background-color: var(--bg-surface);
+  }
+
+  .services-header {
+    max-width: 780px;
+    margin: 0 auto 56px;
+    text-align: center;
+  }
+
+  .services-eyebrow {
+    display: inline-block;
+    font-family: var(--font-heading);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    margin-bottom: 12px;
+  }
+
+  .services-title {
+    margin-bottom: 8px;
+  }
+
+  .services-subtitle {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin-bottom: 16px;
+  }
+
+  .services-intro {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text-body);
+  }
+
+  /* Mobile (< 768px): Carrusel deslizable horizontal mostrando el 85% de la tarjeta activa */
+  .services-grid {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: 4px;
+    padding-bottom: 14px;
+    margin-inline: -4px;
+    padding-inline: 4px;
+    scrollbar-width: none;
+  }
+
+  .services-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .service-card {
+    flex: 0 0 85%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    background-color: #FFFFFF;
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(10, 34, 57, 0.05);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    transition: transform 0.32s var(--ease-out-expo), box-shadow 0.32s var(--ease-out-expo), border-color 0.25s ease;
+  }
+
+  /* Tablet: 2 columnas */
+  @media (min-width: 768px) {
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      overflow-x: visible;
+      padding-bottom: 0;
+      margin-inline: 0;
+      padding-inline: 0;
+    }
+
+    .service-card {
+      flex: initial;
+    }
+  }
+
+  /* Desktop: Estrictamente 3 columnas x 2 filas */
+  @media (min-width: 1080px) {
+    .services-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+  }
+
+  .service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(19, 60, 99, 0.18);
+  }
+
+  .service-media-wrap {
+    position: relative;
+    z-index: 2;
+    height: 215px;
+  }
+
+  .service-img-clip {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .service-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease-out-expo);
+  }
+
+  .service-card:hover .service-img {
+    transform: scale(1.06);
+  }
+
+  .service-img-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 34, 57, 0.04) 0%, rgba(10, 34, 57, 0.32) 100%);
+  }
+
+  .service-curve {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 28px;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .service-floating-icon {
+    position: absolute;
+    right: 24px;
+    bottom: -18px;
+    z-index: 3;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 3px solid #FFFFFF;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 22px -4px rgba(10, 34, 57, 0.25);
+    transition: transform 0.3s ease;
+  }
+
+  .service-floating-icon.bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .service-floating-icon.bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  .service-card:hover .service-floating-icon {
+    transform: translateY(-3px) scale(1.05);
+  }
+
+  .service-body {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 26px 26px 24px;
+  }
+
+  .service-card-title {
+    margin-bottom: 10px;
+    padding-right: 44px;
+  }
+
+  .service-card-desc {
+    font-size: 0.96rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin-bottom: 18px;
+  }
+
+  .service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 22px 0;
+  }
+
+  .service-tag {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    background-color: var(--bg-surface);
+    border: 1px solid rgba(10, 34, 57, 0.08);
+    padding: 4px 11px;
+    border-radius: var(--radius-pill);
+  }
+
+  .service-footer {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(10, 34, 57, 0.07);
+  }
+
+  .service-cta-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .service-arrow-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: var(--bg-surface);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+  }
+
+  .service-card:hover .service-cta-link {
+    color: var(--color-accent);
+  }
+
+  .service-card:hover .service-arrow-btn {
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+    transform: translateX(3px);
+  }
+
+  /* Dots carrusel móvil */
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .carousel-dots {
+      display: none;
+    }
+  }
+
+  .carousel-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    border: none;
+    padding: 0;
+    background: rgba(10, 34, 57, 0.2);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+
+  .carousel-dot.is-active {
+    width: 24px;
+    background: var(--color-accent);
+  }
+
+  /* 3.4 Franja de Consultoría y Asesoría Técnica */
+  .consulting-banner {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-consulting);
+    border: 1.5px solid #FFFFFF;
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .consulting-banner {
+      flex-direction: row;
+      align-items: stretch;
+      margin-top: 56px;
+    }
+  }
+
+  .consulting-media {
+    position: relative;
+    min-height: 240px;
+    overflow: hidden;
+  }
+
+  @media (min-width: 1024px) {
+    .consulting-media {
+      flex: 0 0 35%;
+      max-width: 35%;
+      clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+    }
+  }
+
+  .consulting-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .consulting-content {
+    flex: 1;
+    padding: 32px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  @media (min-width: 1024px) {
+    .consulting-content {
+      padding: 38px 42px 38px 24px;
+    }
+  }
+
+  .consulting-title-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+
+  .consulting-icon-badge {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 8px 18px -4px rgba(10, 34, 57, 0.25);
+  }
+
+  .consulting-h3 {
+    font-size: clamp(1.3rem, 2vw, 1.65rem);
+    font-weight: 800;
+    line-height: 1.2;
+    color: var(--color-primary);
+  }
+
+  .consulting-subtitle {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.02rem;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+  }
+
+  .consulting-desc {
+    font-size: 0.96rem;
+    color: var(--text-body);
+    margin-bottom: 24px;
+    max-width: 720px;
+  }
+
+  .consulting-bottom-row {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  @media (min-width: 1140px) {
+    .consulting-bottom-row {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+  }
+
+  .consulting-pillars {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+  }
+
+  @media (min-width: 768px) {
+    .consulting-pillars {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+    }
+  }
+
+  .consulting-pillar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px 6px 0;
+  }
+
+  @media (min-width: 768px) {
+    .consulting-pillar {
+      padding-inline: 14px;
+      border-right: 1px solid rgba(10, 34, 57, 0.12);
+    }
+
+    .consulting-pillar:first-child {
+      padding-left: 0;
+    }
+
+    .consulting-pillar:last-child {
+      border-right: none;
+    }
+  }
+
+  .pillar-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #FFFFFF;
+    color: var(--color-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(10, 34, 57, 0.06);
+  }
+
+  .pillar-label {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--color-primary);
+  }
+
+  .consulting-cta {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+</style>

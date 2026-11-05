@@ -1,0 +1,310 @@
+/* ==========================================================================
+   360° PRO SOLUCIONES INTEGRALES S.A.S. — DESIGN SYSTEM (UI KIT & TOKENS)
+   Regla cromática 60-30-10 + Escala tipográfica ejecutiva + Scroll-World UX
+   ========================================================================== */
+
+:root {
+  /* 2.1 Paleta de Colores Oficial */
+  --color-primary: #0A2239;
+  --color-primary-rgb: 10, 34, 57;
+  --color-secondary: #133C63;
+  --color-secondary-rgb: 19, 60, 99;
+  --color-accent: #FF6B00;
+  --color-accent-rgb: 255, 107, 0;
+  --color-accent-hover: #E05A00;
+  --bg-light: #FFFFFF;
+  --bg-surface: #F4F7FA;
+  --bg-consulting: #EBF2F7;
+  --color-dark-footer: #061524;
+  --text-body: #475569;
+  --text-heading: #0A2239;
+  --text-light: #F8FAFC;
+  --text-light-muted: #CBD5E1;
+
+  /* 2.2 Jerarquía Tipográfica */
+  --font-heading: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* 2.3 Layout, Bordes y Sombras */
+  --container-max: 1320px;
+  --section-py-desktop: 96px;
+  --section-py-mobile: 64px;
+  --radius-card: 16px;
+  --radius-form: 20px;
+  --radius-pill: 9999px;
+  --shadow-card: 0 10px 30px -5px rgba(10, 34, 57, 0.06);
+  --shadow-card-hover: 0 20px 40px -10px rgba(10, 34, 57, 0.12);
+  --shadow-executive: 0 24px 56px -12px rgba(10, 34, 57, 0.12);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: all 0.25s ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: var(--font-body);
+  color: var(--text-body);
+  background-color: var(--bg-light);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: clip;
+  background-color: var(--bg-light);
+  color: var(--text-body);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+section[id] {
+  scroll-margin-top: 90px;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  color: var(--text-heading);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+}
+
+/* Focus states accesibles (Requerimiento Técnico 4) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.32);
+}
+
+/* Contenedor Corporativo Estándar */
+.container-pro {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+@media (min-width: 1024px) {
+  .container-pro {
+    padding-inline: 40px;
+  }
+}
+
+/* Espaciado Vertical Estándar de Sección */
+.section-pro {
+  padding-block: var(--section-py-mobile);
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .section-pro {
+    padding-block: var(--section-py-desktop);
+  }
+}
+
+/* Tipografía Ejecutiva */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-heading);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+}
+
+.eyebrow-line {
+  width: 32px;
+  height: 2.5px;
+  border-radius: 2px;
+  background-color: var(--color-accent);
+  flex-shrink: 0;
+}
+
+.heading-h1 {
+  font-size: 2.125rem;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+@media (min-width: 768px) {
+  .heading-h1 {
+    font-size: clamp(2.75rem, 4.4vw, 3.5rem);
+  }
+}
+
+.heading-h2 {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+@media (min-width: 768px) {
+  .heading-h2 {
+    font-size: clamp(2.25rem, 3.2vw, 2.5rem);
+  }
+}
+
+.heading-h3 {
+  font-size: 1.25rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+@media (min-width: 1024px) {
+  .heading-h3 {
+    font-size: 1.35rem;
+  }
+}
+
+.body-large {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+}
+
+@media (min-width: 768px) {
+  .body-large {
+    font-size: 1.125rem;
+    line-height: 1.65;
+  }
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+/* Botones Corporativos */
+.btn-primary-pro {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 26px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--color-accent);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 24px -6px rgba(255, 107, 0, 0.42);
+}
+
+.btn-primary-pro:hover {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 30px -6px rgba(255, 107, 0, 0.55);
+}
+
+.btn-primary-pro .btn-arrow-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #FFFFFF;
+  color: var(--color-accent);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.btn-primary-pro:hover .btn-arrow-circle {
+  transform: translateX(3px);
+}
+
+.btn-secondary-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 14px 28px;
+  border-radius: var(--radius-pill);
+  border: 2px solid #FFFFFF;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: all 0.25s ease;
+}
+
+.btn-secondary-outline:hover {
+  background-color: #FFFFFF;
+  color: var(--color-primary);
+  transform: translateY(-2px);
+}
+
+/* Scroll-World Choreographed Reveal States */
+[data-sw-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0) scale(0.985);
+  transition:
+    opacity 0.75s var(--ease-out-expo),
+    transform 0.75s var(--ease-out-expo);
+  transition-delay: var(--sw-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+[data-sw-reveal].is-visible {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [data-sw-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+

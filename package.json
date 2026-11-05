@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "optimize:images": "node scripts/optimize-images.mjs",
+    "optimize:logo": "node scripts/optimize-logo.mjs"
   },
   "dependencies": {
     "astro": "^7.4.5"

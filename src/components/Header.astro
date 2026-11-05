@@ -1,0 +1,427 @@
+---
+import { navLinks } from '../data/siteContent';
+---
+
+<header class="site-header" data-site-header>
+  <!-- Barra superior de progreso Scroll-World -->
+  <div class="header-progress-track" aria-hidden="true">
+    <div class="header-progress-bar" data-header-progress></div>
+  </div>
+
+  <div class="container-pro header-inner">
+    <!-- 1. Izquierda: Marca Corporativa -->
+    <a href="#inicio" class="brand-logo" aria-label="360° Pro Soluciones Integrales S.A.S. — Ir al inicio">
+      <picture>
+        <source
+          type="image/webp"
+          srcset="/brand/logo-360pro.webp 1x, /brand/logo-360pro@2x.webp 2x"
+        />
+        <img
+          src="/brand/logo-360pro.png"
+          srcset="/brand/logo-360pro.png 1x, /brand/logo-360pro@2x.png 2x"
+          width="360"
+          height="96"
+          alt="360° PRO Soluciones Integrales S.A.S."
+          class="brand-logo-img"
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
+    </a>
+
+    <!-- 2. Centro: Navegación Simplificada (Estrictamente tipográfica, sin íconos) -->
+    <nav class="desktop-nav" aria-label="Navegación principal">
+      <ul class="nav-list">
+        {
+          navLinks.map((item, idx) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={['nav-link', { 'is-active': idx === 0 }]}
+                data-nav-link
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <!-- 3. Derecha: CTA Header -->
+    <div class="header-actions">
+      <a href="#contacto" class="header-cta">Solicitar cotización</a>
+
+      <!-- 4. Móvil: Botón Hamburguesa Minimalista -->
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        aria-label="Abrir menú de navegación"
+        aria-expanded="false"
+        aria-controls="mobile-drawer"
+        data-mobile-toggle
+      >
+        <span class="hamburger-line line-1"></span>
+        <span class="hamburger-line line-2"></span>
+        <span class="hamburger-line line-3"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Drawer / Modal Móvil a Pantalla Completa -->
+<div
+  id="mobile-drawer"
+  class="mobile-drawer"
+  aria-hidden="true"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Menú móvil"
+  data-mobile-drawer
+>
+  <div class="mobile-drawer-inner">
+    <div class="mobile-drawer-top">
+      <img
+        src="/brand/logo-360pro-white.webp"
+        srcset="/brand/logo-360pro-white.webp 1x, /brand/logo-360pro-white@2x.webp 2x"
+        width="360"
+        height="96"
+        alt="360° PRO Soluciones Integrales S.A.S."
+        class="mobile-drawer-logo"
+        loading="lazy"
+        decoding="async"
+      />
+      <button
+        type="button"
+        class="mobile-close-btn"
+        aria-label="Cerrar menú"
+        data-mobile-close
+      >
+        ✕
+      </button>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Navegación móvil">
+      <ul>
+        {
+          navLinks.map((item) => (
+            <li>
+              <a href={item.href} class="mobile-nav-link" data-mobile-close>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mobile-drawer-footer">
+      <p class="mobile-drawer-location">Villavicencio, Meta · Cobertura Nacional</p>
+      <a href="#contacto" class="btn-primary-pro mobile-drawer-cta" data-mobile-close>
+        Solicitar cotización
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(10, 34, 57, 0.08);
+    transition: box-shadow 0.25s ease, background-color 0.25s ease;
+  }
+
+  .site-header.is-scrolled {
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 28px -8px rgba(10, 34, 57, 0.08);
+  }
+
+  .header-progress-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2.5px;
+    background: transparent;
+    overflow: hidden;
+  }
+
+  .header-progress-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    will-change: transform;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 82px;
+    gap: 24px;
+  }
+
+  .brand-logo {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .brand-logo-img {
+    display: block;
+    height: 40px;
+    width: auto;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  @media (min-width: 1024px) {
+    .brand-logo-img {
+      height: 48px;
+    }
+  }
+
+  .brand-logo:hover .brand-logo-img {
+    transform: scale(1.02);
+  }
+
+  .desktop-nav {
+    display: none;
+  }
+
+  @media (min-width: 960px) {
+    .desktop-nav {
+      display: block;
+    }
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-block;
+    padding-block: 8px;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.25s ease;
+  }
+
+  .nav-link:hover,
+  .nav-link.is-active {
+    color: var(--color-primary);
+  }
+
+  .nav-link:hover::after,
+  .nav-link.is-active::after {
+    transform: scaleX(1);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .header-cta {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 24px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 8px 20px -6px rgba(255, 107, 0, 0.45);
+    transition: all 0.25s ease;
+  }
+
+  .header-cta:hover {
+    background-color: var(--color-accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -6px rgba(255, 107, 0, 0.55);
+  }
+
+  @media (min-width: 960px) {
+    .header-cta {
+      display: inline-flex;
+    }
+  }
+
+  /* Botón Hamburguesa Móvil */
+  .mobile-menu-btn {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(10, 34, 57, 0.12);
+    background: #FFFFFF;
+    cursor: pointer;
+    padding: 0;
+    transition: var(--transition-base);
+  }
+
+  .mobile-menu-btn:hover {
+    border-color: var(--color-accent);
+  }
+
+  @media (min-width: 960px) {
+    .mobile-menu-btn {
+      display: none;
+    }
+  }
+
+  .hamburger-line {
+    width: 20px;
+    height: 2px;
+    background-color: var(--color-primary);
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.2s ease;
+  }
+
+  .mobile-menu-btn[aria-expanded='true'] .line-1 {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  .mobile-menu-btn[aria-expanded='true'] .line-2 {
+    opacity: 0;
+  }
+
+  .mobile-menu-btn[aria-expanded='true'] .line-3 {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  /* Drawer Móvil Pantalla Completa */
+  .mobile-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(10, 34, 57, 0.98);
+    backdrop-filter: blur(16px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .mobile-drawer.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .mobile-drawer-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    padding: 24px 28px 36px;
+  }
+
+  .mobile-drawer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-drawer-logo {
+    height: 36px;
+    width: auto;
+  }
+
+  .mobile-close-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: #FFFFFF;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: var(--transition-base);
+  }
+
+  .mobile-close-btn:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .mobile-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    text-align: center;
+  }
+
+  .mobile-nav-link {
+    font-family: var(--font-heading);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    padding-block: 6px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mobile-nav-link:hover {
+    color: var(--color-accent);
+    border-bottom-color: var(--color-accent);
+  }
+
+  .mobile-drawer-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mobile-drawer-location {
+    font-size: 0.875rem;
+    color: var(--text-light-muted);
+  }
+
+  .mobile-drawer-cta {
+    width: 100%;
+    max-width: 380px;
+  }
+</style>
+

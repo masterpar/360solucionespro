@@ -1,0 +1,276 @@
+---
+import { corporateStrengths } from '../data/siteContent';
+---
+
+<section id="por-que-elegirnos" class="section-pro why-section" aria-labelledby="why-heading">
+  <!-- Patrón Geométrico Arquitectónico Muy Sutil (opacity: 0.04) -->
+  <div class="why-architectural-pattern" aria-hidden="true"></div>
+
+  <div class="container-pro why-container">
+    <!-- Encabezado -->
+    <div class="why-header" data-sw-reveal>
+      <span class="eyebrow why-eyebrow">¿POR QUÉ ELEGIRNOS?</span>
+      <h2 id="why-heading" class="heading-h2 why-title">
+        Un solo aliado, <span class="text-accent">múltiples soluciones</span>
+      </h2>
+      <p class="why-intro">
+        En <strong>360° Pro Soluciones Integrales S.A.S.</strong> creemos que cada proyecto merece
+        atención profesional, soluciones adecuadas y un acompañamiento responsable. Integramos
+        diferentes especialidades para facilitar la gestión de las necesidades de nuestros clientes,
+        ofreciendo alternativas técnicas, comerciales y operativas desde una misma organización.
+      </p>
+    </div>
+
+    <!-- Grid de 6 Fortalezas (Glassmorphism Ejecutivo 3x2) -->
+    <div class="strengths-grid">
+      {
+        corporateStrengths.map((item, idx) => (
+          <article
+            class="strength-card"
+            data-sw-reveal
+            style={`--sw-delay: ${(idx % 3) * 80}ms`}
+          >
+            <div class="strength-icon-row">
+              <span class="strength-icon" aria-hidden="true">
+                {item.icon === 'briefcase' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="7" width="20" height="14" rx="2" />
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                  </svg>
+                )}
+                {item.icon === 'layers' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <polyline points="2 12 12 17 22 12" />
+                  </svg>
+                )}
+                {item.icon === 'user-check' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <polyline points="16 11 18 13 22 9" />
+                  </svg>
+                )}
+                {item.icon === 'check-badge' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                )}
+                {item.icon === 'compass-draft' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                  </svg>
+                )}
+                {item.icon === 'grid' && (
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="3" width="7" height="7" rx="1" />
+                    <rect x="14" y="14" width="7" height="7" rx="1" />
+                    <rect x="3" y="14" width="7" height="7" rx="1" />
+                  </svg>
+                )}
+              </span>
+              <span class="strength-num">{item.number}</span>
+            </div>
+
+            <h3 class="heading-h3 strength-title">{item.title}</h3>
+            <p class="strength-desc">{item.description}</p>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Banner Interno de Cierre de Sección -->
+    <div class="why-closing-banner" data-sw-reveal>
+      <div class="why-closing-copy">
+        <h3 class="why-closing-title">Tu proyecto, nuestro compromiso</h3>
+        <p class="why-closing-sub">
+          Más que ofrecer servicios, buscamos construir relaciones de confianza y soluciones que
+          generen valor.
+        </p>
+      </div>
+      <a href="#contacto" class="btn-primary-pro why-closing-cta">
+        <span>Hablemos de tu proyecto</span>
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .why-section {
+    background-color: var(--color-primary);
+    color: var(--text-light);
+    overflow: hidden;
+  }
+
+  .why-architectural-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.04;
+    background-image:
+      linear-gradient(to right, #FFFFFF 1px, transparent 1px),
+      linear-gradient(to bottom, #FFFFFF 1px, transparent 1px),
+      radial-gradient(circle at 50% 50%, #FFFFFF 1.5px, transparent 1.5px);
+    background-size: 72px 72px, 72px 72px, 72px 72px;
+    pointer-events: none;
+  }
+
+  .why-container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .why-header {
+    max-width: 800px;
+    margin: 0 auto 56px;
+    text-align: center;
+  }
+
+  .why-eyebrow {
+    margin-bottom: 12px;
+  }
+
+  .why-title {
+    color: #FFFFFF;
+    margin-bottom: 18px;
+  }
+
+  .why-intro {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text-light-muted);
+  }
+
+  .why-intro strong {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .strengths-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  @media (min-width: 768px) {
+    .strengths-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+  }
+
+  @media (min-width: 1080px) {
+    .strengths-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 26px;
+    }
+  }
+
+  .strength-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: var(--radius-card);
+    padding: 30px 28px;
+    transition: all 0.28s ease;
+  }
+
+  .strength-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 107, 0, 0.45);
+    box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
+  }
+
+  .strength-icon-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .strength-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255, 107, 0, 0.14);
+    border: 1px solid rgba(255, 107, 0, 0.35);
+    color: var(--color-accent);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+  }
+
+  .strength-card:hover .strength-icon {
+    background: var(--color-accent);
+    color: #FFFFFF;
+  }
+
+  .strength-num {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.35);
+  }
+
+  .strength-title {
+    color: #FFFFFF;
+    margin-bottom: 10px;
+  }
+
+  .strength-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-light-muted);
+  }
+
+  /* Banner Interno de Cierre */
+  .why-closing-banner {
+    margin-top: 52px;
+    padding: 32px 28px;
+    border-radius: 20px;
+    background: linear-gradient(
+      120deg,
+      rgba(19, 60, 99, 0.85) 0%,
+      rgba(10, 34, 57, 0.95) 65%,
+      rgba(255, 107, 0, 0.16) 100%
+    );
+    border: 1px solid rgba(255, 107, 0, 0.45);
+    box-shadow: 0 20px 44px -12px rgba(0, 0, 0, 0.38);
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+
+  @media (min-width: 960px) {
+    .why-closing-banner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 36px 42px;
+    }
+  }
+
+  .why-closing-title {
+    font-size: clamp(1.35rem, 2.2vw, 1.75rem);
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+  }
+
+  .why-closing-sub {
+    font-size: 1rem;
+    color: var(--text-light-muted);
+  }
+
+  .why-closing-cta {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+</style>
+

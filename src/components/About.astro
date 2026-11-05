@@ -1,0 +1,549 @@
+---
+import { corporateValues } from '../data/siteContent';
+import { imgSrc, imgSrcSet, imgFallback } from '../data/images';
+---
+
+<section id="nosotros" class="section-pro about-section" aria-labelledby="about-heading">
+  <div class="container-pro">
+    <!-- BLOQUE 1: Composición Visual + ¿Quiénes somos? y Experiencia (50/50) -->
+    <div class="about-top-grid">
+      <!-- Izquierda: Composición Fotográfica con Sello Flotante +25 Años -->
+      <div class="about-visual" data-sw-reveal>
+        <div class="about-frame-accent" aria-hidden="true"></div>
+        <div class="about-img-wrapper">
+          <img
+            src={imgSrc('nosotros-experiencia', 1280)}
+            srcset={imgSrcSet('nosotros-experiencia')}
+            sizes="(min-width: 1024px) 600px, 100vw"
+            width="1280"
+            height="853"
+            data-fallback={imgFallback('nosotros-experiencia')}
+            alt="Infraestructura moderna y trayectoria profesional de 360° Pro Soluciones Integrales en Villavicencio, Meta"
+            class="about-main-img"
+            loading="lazy"
+            decoding="async"
+            data-sw-parallax="0.06"
+          />
+        </div>
+
+        <!-- Badge / Sello Visual Flotante -->
+        <div class="experience-seal" data-sw-parallax="-0.05">
+          <div class="seal-top">
+            <span class="seal-number">+25 Años</span>
+          </div>
+          <p class="seal-caption">
+            De experiencia acumulada en nuestro equipo profesional
+          </p>
+        </div>
+
+        <!-- Píldora de Sede Corporativa -->
+        <div class="location-chip">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <span>Villavicencio, Meta · Colombia</span>
+        </div>
+      </div>
+
+      <!-- Derecha: Historia y Respaldo -->
+      <div class="about-copy-col" data-sw-reveal style="--sw-delay: 100ms">
+        <div class="eyebrow about-eyebrow">
+          <span class="eyebrow-line" aria-hidden="true"></span>
+          <span>SOBRE NOSOTROS</span>
+        </div>
+
+        <h2 id="about-heading" class="heading-h2 about-title">
+          ¿Quiénes <span class="text-accent">somos?</span>
+        </h2>
+
+        <div class="about-paragraphs">
+          <p>
+            <strong>360° Pro Soluciones Integrales S.A.S.</strong> es una empresa colombiana con
+            sede en <strong>Villavicencio, Meta</strong>, orientada a ofrecer soluciones integrales
+            para los sectores público y privado.
+          </p>
+          <p>
+            Nuestra propuesta reúne diferentes áreas de conocimiento y servicio, entre ellas
+            arquitectura, ingeniería civil, construcción, mantenimiento, publicidad, artes
+            gráficas, suministros, logística y consultoría especializada.
+          </p>
+          <p>
+            Contamos con un equipo multidisciplinario que aporta conocimientos técnicos y
+            experiencia profesional para atender las necesidades de cada cliente, promoviendo
+            soluciones funcionales, responsables y adaptadas a los objetivos de cada proyecto.
+          </p>
+        </div>
+
+        <!-- Recuadro Destacado (Callout con borde izquierdo #FF6B00 y fondo #F4F7FA) -->
+        <aside class="about-callout" aria-label="Respaldo de experiencia">
+          <h3 class="callout-title">Experiencia que respalda nuestro trabajo</h3>
+          <p class="callout-text">
+            Nuestro equipo profesional reúne <strong>más de 25 años de experiencia acumulada</strong> en el desarrollo de proyectos arquitectónicos, de infraestructura y de carácter
+            institucional. Esta trayectoria corresponde a la experiencia de los profesionales que
+            integran nuestro equipo y constituye un respaldo técnico para el desarrollo de nuevos
+            proyectos.
+          </p>
+          <p class="callout-closing">
+            <em>360° Pro: soluciones integrales, un solo aliado.</em>
+          </p>
+        </aside>
+      </div>
+    </div>
+
+    <!-- BLOQUE 2: Misión y Visión (2 Tarjetas Lado a Lado) -->
+    <div class="mission-vision-grid">
+      <article class="mv-card mv-mission" data-sw-reveal>
+        <div class="mv-header">
+          <span class="mv-icon icon-primary" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="6" />
+              <circle cx="12" cy="12" r="2" />
+            </svg>
+          </span>
+          <h3 class="heading-h3">Nuestra Misión</h3>
+        </div>
+        <p class="mv-text">
+          Brindar soluciones integrales mediante servicios profesionales, técnicos, comerciales y
+          operativos, respondiendo a las necesidades de nuestros clientes con calidad,
+          responsabilidad, innovación y compromiso. Buscamos generar relaciones de confianza,
+          optimizar recursos y aportar al desarrollo de proyectos sostenibles y eficientes.
+        </p>
+      </article>
+
+      <article class="mv-card mv-vision" data-sw-reveal style="--sw-delay: 100ms">
+        <div class="mv-header">
+          <span class="mv-icon icon-accent" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </span>
+          <h3 class="heading-h3">Nuestra Visión</h3>
+        </div>
+        <p class="mv-text">
+          Consolidarnos como una empresa reconocida a nivel regional y nacional por la calidad de
+          nuestros servicios, la capacidad de integrar diferentes especialidades y el compromiso
+          con nuestros clientes. Aspiramos a fortalecer nuestra presencia en los sectores público y
+          privado, ampliando nuestras capacidades y construyendo relaciones comerciales duraderas.
+        </p>
+      </article>
+    </div>
+
+    <!-- BLOQUE 3: Nuestros Valores (Grid de 6 Tarjetas Minimalistas) -->
+    <div class="values-block">
+      <div class="values-header" data-sw-reveal>
+        <span class="eyebrow">PRINCIPIOS RECTORES</span>
+        <h3 class="values-heading">
+          Nuestros <span class="text-accent">Valores Corporativos</span>
+        </h3>
+      </div>
+
+      <div class="values-grid">
+        {
+          corporateValues.map((val, idx) => (
+            <article
+              class="value-card"
+              data-sw-reveal
+              style={`--sw-delay: ${(idx % 3) * 70}ms`}
+            >
+              <div class="value-card-top">
+                <span class="value-icon" aria-hidden="true">
+                  {val.icon === 'shield' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  )}
+                  {val.icon === 'award' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="8" r="6" />
+                      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+                    </svg>
+                  )}
+                  {val.icon === 'scale' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                      <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" />
+                      <path d="M7 21h10" />
+                      <path d="M12 3v18" />
+                      <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" />
+                    </svg>
+                  )}
+                  {val.icon === 'lightbulb' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" />
+                      <path d="M9 18h6" />
+                      <path d="M10 22h4" />
+                    </svg>
+                  )}
+                  {val.icon === 'users' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                  )}
+                  {val.icon === 'target' && (
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  )}
+                </span>
+                <span class="value-num">{val.number}</span>
+              </div>
+              <h4 class="value-title">{val.title}</h4>
+              <p class="value-desc">{val.description}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .about-section {
+    background-color: var(--bg-light);
+  }
+
+  /* Bloque 1 */
+  .about-top-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+
+  @media (min-width: 1024px) {
+    .about-top-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      margin-bottom: 80px;
+    }
+  }
+
+  .about-visual {
+    position: relative;
+    padding-bottom: 24px;
+  }
+
+  @media (min-width: 768px) {
+    .about-visual {
+      padding: 16px 20px 28px 0;
+    }
+  }
+
+  .about-frame-accent {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 78%;
+    height: 82%;
+    border-radius: 22px;
+    border: 2px solid rgba(255, 107, 0, 0.25);
+    background: linear-gradient(135deg, rgba(10, 34, 57, 0.03) 0%, rgba(255, 107, 0, 0.05) 100%);
+    z-index: 0;
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .about-frame-accent {
+      display: block;
+    }
+  }
+
+  .about-img-wrapper {
+    position: relative;
+    z-index: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-executive);
+    aspect-ratio: 4 / 3.4;
+  }
+
+  .about-main-img {
+    width: 100%;
+    height: 112%;
+    margin-top: -6%;
+    object-fit: cover;
+    will-change: transform;
+  }
+
+  .experience-seal {
+    position: absolute;
+    bottom: 0;
+    right: 12px;
+    z-index: 3;
+    max-width: 248px;
+    padding: 20px 22px;
+    border-radius: 18px;
+    background: var(--color-primary);
+    color: #FFFFFF;
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 20px 42px -8px rgba(10, 34, 57, 0.35);
+    will-change: transform;
+  }
+
+  @media (min-width: 768px) {
+    .experience-seal {
+      right: 0;
+      padding: 22px 26px;
+    }
+  }
+
+  .seal-number {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1.05;
+    color: var(--color-accent);
+    margin-bottom: 6px;
+  }
+
+  .seal-caption {
+    font-size: 0.84rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #F8FAFC;
+  }
+
+  .location-chip {
+    position: absolute;
+    top: 28px;
+    left: 18px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(10, 34, 57, 0.14);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .about-eyebrow {
+    margin-bottom: 12px;
+  }
+
+  .about-title {
+    margin-bottom: 20px;
+  }
+
+  .about-paragraphs {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 26px;
+    color: var(--text-body);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .about-paragraphs strong {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .about-callout {
+    background-color: var(--bg-surface);
+    border-left: 4px solid var(--color-accent);
+    border-radius: 0 16px 16px 0;
+    padding: 22px 24px;
+  }
+
+  .callout-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 8px;
+  }
+
+  .callout-text {
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin-bottom: 10px;
+  }
+
+  .callout-text strong {
+    color: var(--color-primary);
+  }
+
+  .callout-closing {
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+  }
+
+  /* Bloque 2: Misión y Visión */
+  .mission-vision-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  @media (min-width: 768px) {
+    .mission-vision-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      margin-bottom: 76px;
+    }
+  }
+
+  .mv-card {
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-card);
+    padding: 32px 30px;
+    box-shadow: var(--shadow-card);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .mv-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  .mv-mission {
+    border-top: 4px solid var(--color-primary);
+  }
+
+  .mv-vision {
+    border-top: 4px solid var(--color-accent);
+  }
+
+  .mv-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .mv-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    flex-shrink: 0;
+  }
+
+  .mv-icon.icon-primary {
+    background-color: var(--color-primary);
+  }
+
+  .mv-icon.icon-accent {
+    background-color: var(--color-accent);
+  }
+
+  .mv-text {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text-body);
+  }
+
+  /* Bloque 3: Valores Corporativos */
+  .values-header {
+    text-align: center;
+    margin-bottom: 36px;
+  }
+
+  .values-heading {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+    margin-top: 8px;
+  }
+
+  .values-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  @media (min-width: 640px) {
+    .values-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .values-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+  }
+
+  .value-card {
+    background: #FFFFFF;
+    border: 1px solid rgba(10, 34, 57, 0.08);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+    transition: all 0.25s ease;
+  }
+
+  .value-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgba(255, 107, 0, 0.35);
+  }
+
+  .value-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .value-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-surface);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s ease;
+  }
+
+  .value-card:hover .value-icon {
+    background: var(--color-accent);
+    color: #FFFFFF;
+  }
+
+  .value-num {
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #94A3B8;
+  }
+
+  .value-title {
+    font-family: var(--font-heading);
+    font-size: 1.12rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 6px;
+  }
+
+  .value-desc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+</style>
+

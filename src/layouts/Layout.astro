@@ -1,23 +1,86 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import "../styles/global.css";
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "360° Pro Soluciones Integrales S.A.S. | Arquitectura, Obras Civiles, Mantenimiento y Consultoría en Villavicencio",
+  description = "Soluciones integrales en Villavicencio, Meta — Arquitectura e Ingeniería Civil, Construcción y Obras Civiles, Mantenimiento, Publicidad y Artes Gráficas, Suministros, Logística y Consultoría Técnica y Ambiental. Un solo aliado para múltiples soluciones.",
+} = Astro.props;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "360° Pro Soluciones Integrales S.A.S.",
+  slogan: "Un solo aliado para múltiples soluciones.",
+  description,
+  email: "360psi.sas@gmail.com",
+  telephone: "+57-301-540-9222",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: "Carrera 17 N.º 32A-03, Urbanización El Bosque",
+    addressLocality: "Villavicencio",
+    addressRegion: "Meta",
+    addressCountry: "CO",
+  },
+  areaServed: ["Villavicencio", "Meta", "Orinoquía", "Colombia"],
+};
+---
+
+<!doctype html>
+  <html lang="es-CO">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      <meta name="generator" content={Astro.generator} />
+
+      <!-- SEO Local & Corporativo (Requerimiento Técnico 1) -->
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta
+        name="keywords"
+        content="Soluciones integrales en Villavicencio, Meta, Arquitectura, Obras Civiles, Construcción, Mantenimiento, Publicidad, Artes Gráficas, Suministros, Logística, Consultoría Ambiental, Interventoría, Licitaciones B2G, 360 Pro Soluciones Integrales"
+      />
+      <meta name="robots" content="index, follow" />
+      <meta name="theme-color" content="#0A2239" />
+
+      <!-- Open Graph -->
+      <meta property="og:type" content="website" />
+      <meta property="og:locale" content="es_CO" />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:image" content="/images/hero-main.jpg" />
+
+    <!-- Precarga de recursos críticos (LCP) -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/images/hero-main-1920.webp"
+      imagesrcset="/images/hero-main-640.webp 640w, /images/hero-main-1280.webp 1280w, /images/hero-main-1920.webp 1920w, /images/hero-main-2560.webp 2560w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
+    <link rel="preload" as="image" type="image/webp" href="/brand/logo-360pro.webp" imagesrcset="/brand/logo-360pro.webp 1x, /brand/logo-360pro@2x.webp 2x" />
+
+      <!-- Google Fonts: Plus Jakarta Sans (700, 800) + Inter (400, 500, 600, 700) -->
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+      <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
+        rel="stylesheet"
+      />
+
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(structuredData)}
+      />
+    </head>
+    <body>
+      <slot />
+    </body>
+  </html>

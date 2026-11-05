@@ -1,0 +1,243 @@
+---
+import { companyContact, serviceSelectOptions } from '../data/siteContent';
+
+const footerPortfolio = serviceSelectOptions.slice(0, 7);
+---
+
+<footer class="corporate-footer">
+  <div class="container-pro footer-main">
+    <!-- Columna 1: Marca -->
+    <div class="footer-col brand-col">
+      <a href="#inicio" class="footer-brand" aria-label="360° Pro Soluciones Integrales S.A.S.">
+        <picture>
+          <source
+            type="image/webp"
+            srcset="/brand/logo-360pro-white.webp 1x, /brand/logo-360pro-white@2x.webp 2x"
+          />
+          <img
+            src="/brand/logo-360pro-white.png"
+            srcset="/brand/logo-360pro-white.png 1x, /brand/logo-360pro-white@2x.png 2x"
+            width="360"
+            height="96"
+            alt="360° PRO Soluciones Integrales S.A.S."
+            class="footer-logo-img"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
+      </a>
+
+      <p class="footer-slogan">
+        “360° Pro: soluciones integrales, un solo aliado.”
+      </p>
+
+      <p class="footer-summary">
+        Aliado estratégico para empresas, instituciones, entidades públicas y clientes particulares
+        en el departamento del Meta y Colombia.
+      </p>
+    </div>
+
+    <!-- Columna 2: Enlaces Rápidos -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Enlaces Rápidos</h4>
+      <ul class="footer-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#recorrido-360">Recorrido 360°</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#por-que-elegirnos">¿Por qué elegirnos?</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </div>
+
+    <!-- Columna 3: Portafolio de Servicios -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Portafolio de Servicios</h4>
+      <ul class="footer-links">
+        {
+          footerPortfolio.map((serviceName) => (
+            <li>
+              <a href="#contacto" data-select-service={serviceName}>
+                {serviceName}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <!-- Columna 4: Contacto Directo -->
+    <div class="footer-col">
+      <h4 class="footer-heading">Contacto Directo</h4>
+      <ul class="footer-contact-list">
+        <li>
+          <span class="fc-label">Dirección:</span>
+          <span>{companyContact.address}</span>
+          <span>{companyContact.city}</span>
+        </li>
+        <li>
+          <span class="fc-label">Teléfonos / WhatsApp:</span>
+          <div class="fc-phones">
+            <a href={companyContact.whatsappUrl} target="_blank" rel="noopener noreferrer">
+              {companyContact.whatsappDisplay}
+            </a>
+            <span aria-hidden="true">/</span>
+            <a href={companyContact.altPhoneUrl}>{companyContact.altPhoneDisplay}</a>
+          </div>
+        </li>
+        <li>
+          <span class="fc-label">Correo corporativo:</span>
+          <a href={companyContact.emailUrl}>{companyContact.email}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Barra Inferior (Copyright) -->
+  <div class="footer-bottom">
+    <div class="container-pro footer-bottom-inner">
+      <p>
+        © 2026 360° Pro Soluciones Integrales S.A.S. Todos los derechos reservados. | Villavicencio,
+        Meta, Colombia.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .corporate-footer {
+    background-color: var(--color-dark-footer);
+    color: var(--text-light-muted);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .footer-main {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 38px;
+    padding-block: 64px 52px;
+  }
+
+  @media (min-width: 768px) {
+    .footer-main {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .footer-main {
+      grid-template-columns: 1.35fr 0.85fr 1.25fr 1.1fr;
+      gap: 42px;
+      padding-block: 76px 60px;
+    }
+  }
+
+  .footer-brand {
+    display: inline-flex;
+    margin-bottom: 18px;
+  }
+
+  .footer-logo-img {
+    display: block;
+    height: 52px;
+    width: auto;
+  }
+
+  .footer-slogan {
+    font-family: var(--font-heading);
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 12px;
+  }
+
+  .footer-summary {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #94A3B8;
+  }
+
+  .footer-heading {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 18px;
+    position: relative;
+    padding-bottom: 10px;
+  }
+
+  .footer-heading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 28px;
+    height: 2.5px;
+    border-radius: 2px;
+    background-color: var(--color-accent);
+  }
+
+  .footer-links,
+  .footer-contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-links a {
+    font-size: 0.9rem;
+    color: var(--text-light-muted);
+    display: inline-block;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .footer-links a:hover {
+    color: var(--color-accent);
+    transform: translateX(3px);
+  }
+
+  .footer-contact-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .fc-label {
+    font-family: var(--font-heading);
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #FFFFFF;
+    margin-top: 4px;
+  }
+
+  .fc-phones {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-contact-list a:hover {
+    color: var(--color-accent);
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-block: 22px;
+  }
+
+  .footer-bottom-inner {
+    text-align: center;
+    font-size: 0.84rem;
+    color: #94A3B8;
+  }
+</style>
+

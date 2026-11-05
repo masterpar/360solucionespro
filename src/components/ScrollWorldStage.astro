@@ -1,0 +1,493 @@
+---
+import { scrollWorldScenes } from "../data/siteContent";
+
+const enginePayload = scrollWorldScenes.map((s) => ({
+  id: s.id,
+  beatNumber: s.beatNumber,
+  stillImage: s.stillImage,
+  fallbackStill: s.fallbackStill,
+  diveVideo: s.diveVideo,
+  connectorVideo: s.connectorVideo,
+}));
+---
+
+<section
+  id="recorrido-360"
+  class="sw-world-track"
+  aria-label="Recorrido interactivo 360° por nuestras especialidades"
+  data-sw-track
+  data-sw-scenes={JSON.stringify(enginePayload)}
+>
+  <div class="sw-sticky-viewport">
+    <!-- Lienzo de Vuelo Continuo (oso95/scroll-world Scrub Engine) -->
+    <canvas class="sw-canvas" data-sw-canvas aria-hidden="true"></canvas>
+
+    <!-- HUD Superior: Telemetría 360° + Salto directo -->
+    <div class="sw-hud-top">
+      <div class="container-pro sw-hud-top-inner">
+        <div class="sw-telemetry">
+          <span class="sw-live-pill">
+            <span class="sw-live-dot"></span>
+            <span data-sw-phase>EXPLORACIÓN DE ESPECIALIDAD · 360° PRO</span>
+          </span>
+          <span class="sw-divider" aria-hidden="true"></span>
+          <span class="sw-coord">
+            GIRO <strong data-sw-degree>000°</strong>
+          </span>
+          <span class="sw-divider hide-sm" aria-hidden="true"></span>
+          <span class="sw-counter hide-sm" data-sw-counter>01 / 06</span>
+        </div>
+
+        <a href="#servicios" class="sw-skip-btn">
+          <span>Ver grilla completa</span>
+          <span aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Tarjetas Sincronizadas de Capítulos (Story Beats) -->
+    <div class="container-pro sw-beats-stage">
+      {
+        scrollWorldScenes.map((scene, idx) => (
+          <article
+            class:list={[
+              "sw-beat-card",
+              scene.hudPosition === "right" ? "align-right" : "align-left",
+            ]}
+            data-sw-beat={idx}
+            aria-hidden={idx === 0 ? "false" : "true"}
+          >
+            <div class="sw-beat-header">
+              <span class="sw-beat-num">{scene.beatNumber}</span>
+              <span class="sw-beat-eyebrow">{scene.eyebrow}</span>
+            </div>
+
+            <h2 class="sw-beat-title">
+              {scene.title} <span class="text-accent">{scene.highlight}</span>
+            </h2>
+
+            <p class="sw-beat-desc">{scene.description}</p>
+
+            <div class="sw-beat-tags">
+              {scene.tags.map((tag) => (
+                <span class="sw-beat-tag">{tag}</span>
+              ))}
+            </div>
+
+            <div class="sw-beat-footer">
+              <span class="sw-beat-metrics">{scene.metrics}</span>
+              <a
+                href="#contacto"
+                class="sw-beat-cta"
+                data-select-service={scene.serviceValue}
+              >
+                <span>Cotizar línea</span>
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+
+    <!-- Barra Inferior Interactiva de Scrubbing por Capítulos -->
+    <div class="sw-hud-bottom">
+      <div class="container-pro">
+        <div
+          class="sw-scrub-rail"
+          role="tablist"
+          aria-label="Capítulos del recorrido 360°"
+        >
+          <div class="sw-chapter-list">
+            {
+              scrollWorldScenes.map((scene, idx) => (
+                <button
+                  type="button"
+                  class:list={["sw-chapter-btn", { "is-active": idx === 0 }]}
+                  data-sw-jump={idx}
+                  aria-current={idx === 0 ? "step" : "false"}
+                >
+                  <span class="sw-ch-num">{scene.beatNumber}</span>
+                  <span class="sw-ch-label">{scene.chapterLabel}</span>
+                </button>
+              ))
+            }
+          </div>
+          <div class="sw-timeline-bar" aria-hidden="true">
+            <div class="sw-timeline-fill" data-sw-progress-fill></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Pista vertical que impulsa el motor scroll-scrub */
+  .sw-world-track {
+    position: relative;
+    height: 440vh;
+    background-color: #061524;
+  }
+
+  @media (min-width: 1024px) {
+    .sw-world-track {
+      height: 520vh;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sw-world-track {
+      height: 140vh;
+    }
+  }
+
+  .sw-sticky-viewport {
+    position: sticky;
+    top: 82px;
+    width: 100%;
+    height: calc(100vh - 82px);
+    min-height: 540px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .sw-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 0;
+  }
+
+  /* HUD Superior */
+  .sw-hud-top {
+    position: relative;
+    z-index: 3;
+    padding-top: 20px;
+  }
+
+  .sw-hud-top-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sw-telemetry {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(6, 21, 36, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(12px);
+    color: var(--text-light);
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sw-live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sw-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 0 0 10px var(--color-accent);
+  }
+
+  .sw-divider {
+    width: 1px;
+    height: 13px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .sw-coord strong {
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sw-counter {
+    font-variant-numeric: tabular-nums;
+    color: var(--text-light-muted);
+  }
+
+  .hide-sm {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .hide-sm {
+      display: inline-block;
+    }
+  }
+
+  .sw-skip-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .sw-skip-btn:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* Escenario Central de Story Beats */
+  .sw-beats-stage {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  .sw-beat-card {
+    position: absolute;
+    width: calc(100% - 48px);
+    max-width: 500px;
+    padding: 20px 22px;
+    border-radius: 20px;
+    background: rgba(10, 34, 57, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    color: #ffffff;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  @media (min-width: 640px) {
+    .sw-beat-card {
+      padding: 26px 28px;
+    }
+  }
+
+  .sw-beat-card.align-left {
+    left: 24px;
+  }
+
+  .sw-beat-card.align-right {
+    left: 24px;
+  }
+
+  @media (min-width: 1024px) {
+    .sw-beat-card {
+      padding: 32px 34px;
+    }
+
+    .sw-beat-card.align-left {
+      left: 40px;
+    }
+
+    .sw-beat-card.align-right {
+      left: auto;
+      right: 40px;
+    }
+  }
+
+  .sw-beat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .sw-beat-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: rgba(255, 107, 0, 0.2);
+    border: 1px solid rgba(255, 107, 0, 0.5);
+    color: var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  .sw-beat-eyebrow {
+    font-family: var(--font-heading);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-light-muted);
+    text-transform: uppercase;
+  }
+
+  .sw-beat-title {
+    font-size: clamp(1.55rem, 2.5vw, 2.15rem);
+    line-height: 1.15;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 12px;
+  }
+
+  .sw-beat-desc {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-light-muted);
+    margin-bottom: 16px;
+  }
+
+  .sw-beat-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 18px;
+  }
+
+  .sw-beat-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f8fafc;
+  }
+
+  .sw-beat-footer {
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .sw-beat-metrics {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+
+  .sw-beat-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    white-space: nowrap;
+  }
+
+  .sw-beat-cta:hover {
+    color: #ffffff;
+    transform: translateX(3px);
+  }
+
+  /* Barra Inferior de Capítulos */
+  .sw-hud-bottom {
+    position: relative;
+    z-index: 3;
+    padding-bottom: 22px;
+  }
+
+  .sw-scrub-rail {
+    background: rgba(6, 21, 36, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 10px 14px 12px;
+  }
+
+  .sw-chapter-list {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .sw-chapter-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 7px 8px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-light-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sw-chapter-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+  }
+
+  .sw-chapter-btn.is-active {
+    background: rgba(255, 107, 0, 0.16);
+    border-color: rgba(255, 107, 0, 0.45);
+    color: #ffffff;
+  }
+
+  .sw-ch-num {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--color-accent);
+  }
+
+  .sw-ch-label {
+    display: none;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 900px) {
+    .sw-ch-label {
+      display: inline;
+    }
+  }
+
+  .sw-timeline-bar {
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+
+  .sw-timeline-fill {
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff6b00 0%, #ffa14a 100%);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    will-change: transform;
+  }
+</style>

@@ -1,11 +1,70 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Hero from "../components/Hero.astro";
+import ScrollWorldStage from "../components/ScrollWorldStage.astro";
+import Services from "../components/Services.astro";
+import About from "../components/About.astro";
+import WhyChooseUs from "../components/WhyChooseUs.astro";
+import Contact from "../components/Contact.astro";
+import Footer from "../components/Footer.astro";
+import WhatsAppFab from "../components/WhatsAppFab.astro";
 ---
 
 <Layout>
-	<Welcome />
+  <!-- 3.1 Barra de Navegación Corporativa -->
+  <Header />
+
+  <main>
+    <!-- 3.2 Sección 1: Inicio — Hero Banner (#inicio) -->
+    <Hero />
+
+    <!-- Transición Inmersiva Scroll-World (oso95/scroll-world Scrub Engine) -->
+    <ScrollWorldStage />
+
+    <!-- 3.3 & 3.4 Sección 2: Nuestros Servicios + Consultoría Técnica (#servicios) -->
+    <Services />
+
+    <!-- 3.5 Sección 3: Nosotros — Identidad, Misión/Visión y Valores (#nosotros) -->
+    <About />
+
+    <!-- 3.6 Sección 4: ¿Por Qué Elegirnos? — Diferenciadores (#por-que-elegirnos) -->
+    <WhyChooseUs />
+
+    <!-- 3.7 Sección 5: Contacto y Cotizaciones (#contacto) -->
+    <Contact />
+  </main>
+
+  <!-- 3.8 Footer Corporativo -->
+  <Footer />
+
+  <!-- Requerimiento Técnico 3: Botón Flotante de WhatsApp (FAB) -->
+  <WhatsAppFab />
+
+  <script>
+    import {
+      ScrollWorldEngine,
+      type EngineSceneConfig,
+    } from "../scripts/scroll-world-engine";
+    import { initUIInteractions } from "../scripts/ui-interactions";
+
+    const bootstrap = () => {
+      initUIInteractions();
+
+      const trackEl = document.querySelector<HTMLElement>("[data-sw-track]");
+      if (trackEl) {
+        const rawScenes = trackEl.dataset.swScenes;
+        if (rawScenes) {
+          const parsedScenes: EngineSceneConfig[] = JSON.parse(rawScenes);
+          new ScrollWorldEngine(trackEl, parsedScenes);
+        }
+      }
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", bootstrap, { once: true });
+    } else {
+      bootstrap();
+    }
+  </script>
 </Layout>

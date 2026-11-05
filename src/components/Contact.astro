@@ -1,0 +1,639 @@
+---
+import { companyContact, serviceSelectOptions } from '../data/siteContent';
+---
+
+<section id="contacto" class="section-pro contact-section" aria-labelledby="contact-heading">
+  <div class="container-pro">
+    <div class="contact-grid">
+      <!-- COLUMNA IZQUIERDA (45%): Información de Contacto -->
+      <div class="contact-info-col" data-sw-reveal>
+        <div class="eyebrow contact-eyebrow">
+          <span class="eyebrow-line" aria-hidden="true"></span>
+          <span>CONTACTO</span>
+        </div>
+
+        <h2 id="contact-heading" class="heading-h2 contact-title">
+          Estamos listos para conocer <span class="text-accent">tu proyecto</span>
+        </h2>
+
+        <p class="contact-subtitle">
+          Hablemos de tus ideas y encontremos juntos la mejor solución.
+        </p>
+
+        <p class="contact-paragraph">
+          En <strong>360° Pro Soluciones Integrales S.A.S.</strong> estamos disponibles para
+          recibir tus consultas, conocer tus necesidades y orientarte sobre nuestros servicios. Si
+          necesitas una cotización, asesoría profesional, información sobre suministros o
+          acompañamiento para desarrollar un proyecto, comunícate con nosotros.
+        </p>
+
+        <!-- Lista de Datos Oficiales (Tarjetas compactas con ícono circular a la izquierda) -->
+        <div class="contact-cards-list">
+          <div class="contact-item-card">
+            <span class="contact-item-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="2" width="18" height="20" rx="2" />
+                <path d="M9 22v-4h6v4" />
+                <path d="M8 6h.01" />
+                <path d="M16 6h.01" />
+                <path d="M8 10h.01" />
+                <path d="M16 10h.01" />
+                <path d="M8 14h.01" />
+                <path d="M16 14h.01" />
+              </svg>
+            </span>
+            <div class="contact-item-body">
+              <span class="contact-item-label">Empresa</span>
+              <strong class="contact-item-value">{companyContact.name}</strong>
+            </div>
+          </div>
+
+          <div class="contact-two-up">
+            <a
+              href={companyContact.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="contact-item-card is-interactive"
+            >
+              <span class="contact-item-icon icon-wa" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+              </span>
+              <div class="contact-item-body">
+                <span class="contact-item-label">WhatsApp comercial</span>
+                <strong class="contact-item-value">{companyContact.whatsappDisplay}</strong>
+              </div>
+            </a>
+
+            <a href={companyContact.altPhoneUrl} class="contact-item-card is-interactive">
+              <span class="contact-item-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                </svg>
+              </span>
+              <div class="contact-item-body">
+                <span class="contact-item-label">Teléfono alternativo</span>
+                <strong class="contact-item-value">{companyContact.altPhoneDisplay}</strong>
+              </div>
+            </a>
+          </div>
+
+          <a href={companyContact.emailUrl} class="contact-item-card is-interactive">
+            <span class="contact-item-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+            </span>
+            <div class="contact-item-body">
+              <span class="contact-item-label">Correo electrónico</span>
+              <strong class="contact-item-value">{companyContact.email}</strong>
+            </div>
+          </a>
+
+          <div class="contact-item-card">
+            <span class="contact-item-icon" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                <circle cx="12" cy="10" r="3" />
+              </svg>
+            </span>
+            <div class="contact-item-body">
+              <span class="contact-item-label">Dirección y Ciudad</span>
+              <strong class="contact-item-value">{companyContact.address}</strong>
+              <span class="contact-item-sub">{companyContact.city}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de Acción Directa WhatsApp -->
+        <a
+          href={companyContact.whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="whatsapp-direct-btn"
+        >
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+            <path d="M16.004 3.2c-7.068 0-12.8 5.732-12.8 12.8 0 2.256.59 4.46 1.71 6.404L3.096 29.04l6.8-1.784a12.748 12.748 0 0 0 6.104 1.552h.006c7.066 0 12.798-5.732 12.798-12.8 0-3.42-1.332-6.636-3.75-9.054A12.716 12.716 0 0 0 16.004 3.2Zm0 23.452h-.004a10.6 10.6 0 0 1-5.404-1.48l-.388-.23-4.036 1.058 1.078-3.934-.252-.402a10.596 10.596 0 0 1-1.628-5.664c0-5.868 4.774-10.642 10.642-10.642 2.842 0 5.514 1.108 7.522 3.118a10.574 10.574 0 0 1 3.116 7.526c0 5.87-4.776 10.65-10.646 10.65Zm5.838-7.974c-.32-.16-1.894-.934-2.188-1.042-.294-.106-.508-.16-.722.16-.214.32-.828 1.042-1.014 1.256-.186.214-.374.24-.694.08-.32-.16-1.352-.498-2.576-1.59-.952-.85-1.596-1.898-1.782-2.218-.186-.32-.02-.494.14-.652.144-.144.32-.374.48-.56.16-.188.214-.32.32-.534.106-.214.054-.402-.026-.562-.08-.16-.722-1.738-.988-2.38-.26-.624-.526-.54-.722-.55l-.614-.01c-.214 0-.56.08-.854.402-.294.32-1.122 1.096-1.122 2.672s1.148 3.1 1.308 3.314c.16.214 2.26 3.45 5.476 4.838.764.33 1.362.528 1.826.676.768.244 1.466.21 2.018.128.616-.092 1.894-.774 2.162-1.522.266-.748.266-1.39.186-1.522-.08-.134-.294-.214-.614-.374Z" />
+          </svg>
+          <span>Escríbenos por WhatsApp</span>
+        </a>
+      </div>
+
+      <!-- COLUMNA DERECHA (55%): Tarjeta de Formulario "Solicita tu cotización" -->
+      <div class="contact-form-card" data-sw-reveal style="--sw-delay: 120ms">
+        <div class="form-card-header">
+          <h3 class="heading-h3 form-card-title">Solicita tu cotización</h3>
+          <p class="form-card-desc">
+            Cuéntanos qué necesitas. Nuestro equipo revisará tu solicitud para brindarte información
+            sobre los servicios que podemos ofrecerte.
+          </p>
+        </div>
+
+        <form id="form-cotizacion" class="quote-form" novalidate={false}>
+          <!-- 1. Nombre completo o Razón Social -->
+          <div class="form-group">
+            <label for="nombre-razon" class="form-label">
+              Nombre completo o Razón Social <span class="req">*</span>
+            </label>
+            <input
+              type="text"
+              id="nombre-razon"
+              name="nombre"
+              class="form-input"
+              placeholder="Ej. Constructora del Oriente S.A.S. / Juan Pérez"
+              autocomplete="name"
+              required
+            />
+          </div>
+
+          <!-- 2. Correo electrónico y Teléfono / WhatsApp (2 columnas en Desktop) -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="correo-cliente" class="form-label">
+                Correo electrónico <span class="req">*</span>
+              </label>
+              <input
+                type="email"
+                id="correo-cliente"
+                name="correo"
+                class="form-input"
+                placeholder="contacto@empresa.com"
+                autocomplete="email"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="telefono-cliente" class="form-label">
+                Teléfono / WhatsApp <span class="req">*</span>
+              </label>
+              <input
+                type="tel"
+                id="telefono-cliente"
+                name="telefono"
+                class="form-input"
+                placeholder="Ej. 300 000 0000"
+                autocomplete="tel"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- 3. Línea de servicio de interés -->
+          <div class="form-group">
+            <label for="servicio-interes" class="form-label">
+              Línea de servicio de interés <span class="req">*</span>
+            </label>
+            <div class="select-wrapper">
+              <select
+                id="servicio-interes"
+                name="servicio"
+                class="form-select"
+                required
+              >
+                <option value="" disabled selected>Selecciona una línea de servicio</option>
+                {
+                  serviceSelectOptions.map((option) => (
+                    <option value={option}>{option}</option>
+                  ))
+                }
+              </select>
+              <span class="select-chevron" aria-hidden="true">▾</span>
+            </div>
+          </div>
+
+          <!-- 4. Mensaje o descripción del requerimiento -->
+          <div class="form-group">
+            <label for="mensaje-proyecto" class="form-label">
+              Mensaje o descripción del requerimiento
+            </label>
+            <textarea
+              id="mensaje-proyecto"
+              name="mensaje"
+              rows="4"
+              class="form-textarea"
+              placeholder="Describe brevemente el alcance, ubicación del proyecto o suministros requeridos..."
+            ></textarea>
+          </div>
+
+          <!-- 5. Checkbox Política de Tratamiento de Datos Personales (Habeas Data Colombia) -->
+          <label class="checkbox-group" for="habeas-data">
+            <input
+              type="checkbox"
+              id="habeas-data"
+              name="habeasData"
+              class="form-checkbox"
+              required
+            />
+            <span class="checkbox-text">
+              Acepto la Política de Tratamiento de Datos Personales conforme a la Ley 1581 de 2012
+              (Habeas Data Colombia) y autorizo a <strong>360° Pro Soluciones Integrales S.A.S.</strong> para dar respuesta a mi solicitud.
+            </span>
+          </label>
+
+          <!-- 6. Botón Submit (100% ancho) -->
+          <button type="submit" class="btn-primary-pro form-submit-btn">
+            Enviar solicitud
+          </button>
+        </form>
+
+        <!-- Vista de Confirmación Ejecutiva -->
+        <div class="form-success-state" hidden tabindex="-1" data-form-success>
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <h4 class="success-title">¡Solicitud estructurada con éxito!</h4>
+          <p class="success-text">
+            Hemos preparado el resumen técnico de tu requerimiento. Puedes enviarlo de inmediato a
+            nuestra línea comercial de WhatsApp para atención prioritaria o escribirnos por correo:
+          </p>
+          <div class="success-actions">
+            <a
+              href={companyContact.whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary-pro success-wa-btn"
+              data-form-whatsapp
+            >
+              Enviar resumen ahora por WhatsApp →
+            </a>
+            <button type="button" class="reset-form-btn" data-form-reset>
+              Realizar otra consulta
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-section {
+    background-color: var(--bg-surface);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 44px;
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    .contact-grid {
+      grid-template-columns: 45fr 55fr;
+      gap: 52px;
+    }
+  }
+
+  .contact-eyebrow {
+    margin-bottom: 12px;
+  }
+
+  .contact-title {
+    margin-bottom: 10px;
+  }
+
+  .contact-subtitle {
+    font-family: var(--font-heading);
+    font-size: 1.06rem;
+    font-weight: 700;
+    color: var(--color-secondary);
+    margin-bottom: 14px;
+  }
+
+  .contact-paragraph {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text-body);
+    margin-bottom: 26px;
+  }
+
+  .contact-paragraph strong {
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+
+  .contact-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .contact-two-up {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 560px) {
+    .contact-two-up {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .contact-item-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: #FFFFFF;
+    border-radius: 14px;
+    border: 1px solid rgba(10, 34, 57, 0.07);
+    box-shadow: 0 6px 18px -6px rgba(10, 34, 57, 0.05);
+    transition: all 0.22s ease;
+  }
+
+  .contact-item-card.is-interactive:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 107, 0, 0.4);
+    box-shadow: 0 12px 24px -8px rgba(10, 34, 57, 0.1);
+  }
+
+  .contact-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(10, 34, 57, 0.07);
+    color: var(--color-primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-item-icon.icon-wa {
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803D;
+  }
+
+  .contact-item-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .contact-item-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+  }
+
+  .contact-item-value {
+    font-family: var(--font-heading);
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    word-break: break-word;
+  }
+
+  .contact-item-sub {
+    font-size: 0.84rem;
+    color: var(--text-body);
+  }
+
+  .whatsapp-direct-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: var(--radius-pill);
+    background-color: #16A34A;
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    font-weight: 700;
+    box-shadow: 0 12px 24px -6px rgba(22, 163, 74, 0.42);
+    transition: all 0.25s ease;
+  }
+
+  @media (min-width: 560px) {
+    .whatsapp-direct-btn {
+      width: auto;
+    }
+  }
+
+  .whatsapp-direct-btn:hover {
+    background-color: #15803D;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 28px -6px rgba(22, 163, 74, 0.52);
+  }
+
+  /* Tarjeta Derecha de Formulario */
+  .contact-form-card {
+    background-color: #FFFFFF;
+    border-radius: var(--radius-form);
+    padding: 28px 24px;
+    border: 1px solid rgba(10, 34, 57, 0.06);
+    box-shadow: var(--shadow-executive);
+  }
+
+  @media (min-width: 768px) {
+    .contact-form-card {
+      padding: 40px;
+    }
+  }
+
+  .form-card-header {
+    margin-bottom: 26px;
+  }
+
+  .form-card-title {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  .form-card-desc {
+    font-size: 0.94rem;
+    color: var(--text-body);
+    line-height: 1.55;
+  }
+
+  .quote-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  @media (min-width: 640px) {
+    .form-row-2 {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .form-label {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .req {
+    color: var(--color-accent);
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 1.5px solid #CBD5E1;
+    background-color: #F8FAFC;
+    color: var(--color-primary);
+    font-size: 0.95rem;
+    transition: all 0.22s ease;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #94A3B8;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    background-color: #FFFFFF;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3.5px rgba(255, 107, 0, 0.18);
+  }
+
+  .form-select.is-highlighted {
+    border-color: var(--color-accent);
+    background-color: #FFF7ED;
+    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.25);
+  }
+
+  .select-wrapper {
+    position: relative;
+  }
+
+  .form-select {
+    appearance: none;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .select-chevron {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--color-secondary);
+    font-size: 0.95rem;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 110px;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    cursor: pointer;
+    padding-top: 2px;
+  }
+
+  .form-checkbox {
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .checkbox-text {
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-body);
+  }
+
+  .checkbox-text strong {
+    color: var(--color-primary);
+  }
+
+  .form-submit-btn {
+    width: 100%;
+    padding-block: 15px;
+    font-size: 1rem;
+    margin-top: 4px;
+  }
+
+  /* Estado de éxito */
+  .form-success-state {
+    padding: 28px 16px;
+    text-align: center;
+  }
+
+  .success-icon {
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: rgba(22, 163, 74, 0.14);
+    color: #15803D;
+    font-size: 1.7rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 10px;
+  }
+
+  .success-text {
+    font-size: 0.95rem;
+    color: var(--text-body);
+    margin-bottom: 22px;
+  }
+
+  .success-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .success-wa-btn {
+    width: 100%;
+  }
+
+  .reset-form-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-secondary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 8px;
+    text-decoration: underline;
+  }
+</style>
+

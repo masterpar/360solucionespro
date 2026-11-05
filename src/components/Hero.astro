@@ -1,0 +1,325 @@
+---
+import { imgSrc, imgSrcSet, imgFallback } from '../data/images';
+---
+
+<section id="inicio" class="hero-section" aria-labelledby="hero-heading">
+  <!-- Imagen Arquitectónica Derecha + Efecto de inmersión Scroll-World -->
+  <div class="hero-media" aria-hidden="true">
+    <img
+      src={imgSrc('hero-main', 1920)}
+      srcset={imgSrcSet('hero-main')}
+      sizes="100vw"
+      width="1920"
+      height="1280"
+      data-fallback={imgFallback('hero-main')}
+      alt="Infraestructura corporativa moderna de 360° Pro Soluciones Integrales S.A.S."
+      class="hero-bg-img"
+      loading="eager"
+      fetchpriority="high"
+      decoding="async"
+      data-hero-bg
+    />
+    <!-- Máscara Diagonal en Desktop / Vertical en Móvil -->
+    <div class="hero-gradient-mask"></div>
+    <!-- Retícula arquitectónica sutil -->
+    <div class="hero-grid-accent"></div>
+  </div>
+
+  <div class="container-pro hero-container">
+    <div class="hero-content">
+      <!-- Eyebrow con línea horizontal corta en #FF6B00 -->
+      <div class="eyebrow hero-eyebrow" data-sw-reveal>
+        <span class="eyebrow-line" aria-hidden="true"></span>
+        <span>SOLUCIONES INTEGRALES PARA TUS PROYECTOS</span>
+      </div>
+
+      <!-- Título H1 Oficial -->
+      <h1
+        id="hero-heading"
+        class="heading-h1 hero-title"
+        data-sw-reveal
+        style="--sw-delay: 80ms"
+      >
+        IDEAS QUE <span class="text-accent">CONSTRUYEN</span> GRANDES RESULTADOS
+      </h1>
+
+      <!-- Párrafo Principal (Copy Ejecutivo) -->
+      <p class="body-large hero-copy" data-sw-reveal style="--sw-delay: 160ms">
+        En <strong>360° Pro Soluciones Integrales S.A.S.</strong> integramos conocimientos,
+        experiencia y capacidades profesionales para ofrecer soluciones a las necesidades
+        de empresas, instituciones, entidades públicas y clientes particulares. Desarrollamos
+        servicios en arquitectura e ingeniería civil, construcción, mantenimiento
+        y adecuaciones, publicidad y artes gráficas, suministros, logística operativa
+        y consultoría técnica y ambiental.
+      </p>
+
+      <!-- Frase de Apoyo con borde izquierdo naranja -->
+      <blockquote
+        class="hero-support-quote"
+        data-sw-reveal
+        style="--sw-delay: 230ms"
+      >
+        Un solo aliado para múltiples soluciones.
+      </blockquote>
+
+      <!-- Grupo de Botones (Flexbox, apilables al 100% en móvil) -->
+      <div class="hero-cta-group" data-sw-reveal style="--sw-delay: 300ms">
+        <a href="#servicios" class="btn-primary-pro hero-btn">
+          <span>Conoce nuestros servicios</span>
+          <span class="btn-arrow-circle" aria-hidden="true">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14"></path>
+              <path d="m12 5 7 7-7 7"></path>
+            </svg>
+          </span>
+        </a>
+
+        <a href="#contacto" class="btn-secondary-outline hero-btn">
+          Solicitar cotización
+        </a>
+      </div>
+
+      <!-- Indicadores de respaldo ejecutivo + invitación al vuelo 360° -->
+      <div class="hero-trust-strip" data-sw-reveal style="--sw-delay: 380ms">
+        <div class="trust-pill">
+          <span class="trust-dot"></span>
+          <span>Sectores Público (B2G), Empresarial (B2B) y Privado</span>
+        </div>
+        <a href="#recorrido-360" class="scroll-world-cue">
+          <span class="cue-mouse" aria-hidden="true">
+            <span class="cue-wheel"></span>
+          </span>
+          <span>Desliza para explorar el mundo 360°</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    position: relative;
+    min-height: 85vh;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-primary);
+    overflow: hidden;
+    padding-block: 68px 80px;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-section {
+      min-height: 88vh;
+      padding-block: 88px 96px;
+    }
+  }
+
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .hero-bg-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    transform-origin: 65% 50%;
+    will-change: transform;
+  }
+
+  /* Móvil: Degradado vertical para garantizar legibilidad del 100% */
+  .hero-gradient-mask {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(10, 34, 57, 0.95) 0%,
+      rgba(10, 34, 57, 0.9) 62%,
+      rgba(10, 34, 57, 0.76) 100%
+    );
+  }
+
+  /* Desktop: Corte diagonal / máscara exacta de la especificación */
+  @media (min-width: 960px) {
+    .hero-gradient-mask {
+      background: linear-gradient(
+        105deg,
+        #0a2239 0%,
+        #0a2239 52%,
+        rgba(10, 34, 57, 0.75) 70%,
+        rgba(10, 34, 57, 0.2) 100%
+      );
+    }
+  }
+
+  .hero-grid-accent {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: linear-gradient(90deg, rgba(0, 0, 0, 0.8) 0%, transparent 65%);
+    -webkit-mask-image: linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.8) 0%,
+      transparent 65%
+    );
+    pointer-events: none;
+  }
+
+  .hero-container {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-content {
+    width: 100%;
+  }
+
+  /* Columna Izquierda — 60% ancho en Desktop */
+  @media (min-width: 960px) {
+    .hero-content {
+      max-width: 60%;
+    }
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    color: #ffffff;
+    margin-bottom: 24px;
+    letter-spacing: -0.025em;
+  }
+
+  .hero-copy {
+    color: var(--text-light-muted);
+    margin-bottom: 24px;
+  }
+
+  .hero-copy strong {
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  .hero-support-quote {
+    margin: 0 0 34px 0;
+    padding: 6px 0 6px 18px;
+    border-left: 4px solid var(--color-accent);
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+  }
+
+  .hero-cta-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .hero-btn {
+    width: 100%;
+  }
+
+  @media (min-width: 640px) {
+    .hero-cta-group {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .hero-btn {
+      width: auto;
+    }
+  }
+
+  .hero-trust-strip {
+    margin-top: 42px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-light-muted);
+  }
+
+  .trust-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    box-shadow: 0 0 0 4px rgba(255, 107, 0, 0.22);
+  }
+
+  .scroll-world-cue {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ffffff;
+    opacity: 0.88;
+  }
+
+  .scroll-world-cue:hover {
+    opacity: 1;
+    color: var(--color-accent);
+  }
+
+  .cue-mouse {
+    width: 20px;
+    height: 30px;
+    border: 1.8px solid rgba(255, 255, 255, 0.65);
+    border-radius: 12px;
+    display: inline-flex;
+    justify-content: center;
+    padding-top: 5px;
+  }
+
+  .cue-wheel {
+    width: 3px;
+    height: 6px;
+    border-radius: 2px;
+    background-color: var(--color-accent);
+    animation: scrollCueBounce 1.8s infinite ease-in-out;
+  }
+
+  @keyframes scrollCueBounce {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    60% {
+      transform: translateY(8px);
+      opacity: 0.35;
+    }
+  }
+</style>

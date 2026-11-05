@@ -1,0 +1,93 @@
+---
+import { companyContact } from '../data/siteContent';
+---
+
+<a
+  href={`${companyContact.whatsappUrl}?text=${encodeURIComponent('Hola 360° Pro Soluciones Integrales S.A.S., me gustaría recibir información sobre sus servicios.')}`}
+  target="_blank"
+  rel="noopener noreferrer"
+  class="whatsapp-fab"
+  aria-label="Contactar por WhatsApp al 301 540 9222"
+>
+  <span class="wa-fab-pulse" aria-hidden="true"></span>
+  <span class="wa-fab-tooltip" aria-hidden="true">WhatsApp · 301 540 9222</span>
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+    <path d="M16.004 3.2c-7.068 0-12.8 5.732-12.8 12.8 0 2.256.59 4.46 1.71 6.404L3.096 29.04l6.8-1.784a12.748 12.748 0 0 0 6.104 1.552h.006c7.066 0 12.798-5.732 12.798-12.8 0-3.42-1.332-6.636-3.75-9.054A12.716 12.716 0 0 0 16.004 3.2Zm0 23.452h-.004a10.6 10.6 0 0 1-5.404-1.48l-.388-.23-4.036 1.058 1.078-3.934-.252-.402a10.596 10.596 0 0 1-1.628-5.664c0-5.868 4.774-10.642 10.642-10.642 2.842 0 5.514 1.108 7.522 3.118a10.574 10.574 0 0 1 3.116 7.526c0 5.87-4.776 10.65-10.646 10.65Zm5.838-7.974c-.32-.16-1.894-.934-2.188-1.042-.294-.106-.508-.16-.722.16-.214.32-.828 1.042-1.014 1.256-.186.214-.374.24-.694.08-.32-.16-1.352-.498-2.576-1.59-.952-.85-1.596-1.898-1.782-2.218-.186-.32-.02-.494.14-.652.144-.144.32-.374.48-.56.16-.188.214-.32.32-.534.106-.214.054-.402-.026-.562-.08-.16-.722-1.738-.988-2.38-.26-.624-.526-.54-.722-.55l-.614-.01c-.214 0-.56.08-.854.402-.294.32-1.122 1.096-1.122 2.672s1.148 3.1 1.308 3.314c.16.214 2.26 3.45 5.476 4.838.764.33 1.362.528 1.826.676.768.244 1.466.21 2.018.128.616-.092 1.894-.774 2.162-1.522.266-.748.266-1.39.186-1.522-.08-.134-.294-.214-.614-.374Z" />
+  </svg>
+</a>
+
+<style>
+  .whatsapp-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 60;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #25D366;
+    color: #FFFFFF;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 14px 30px -6px rgba(37, 211, 102, 0.55);
+    transition: transform 0.25s ease, background-color 0.25s ease;
+  }
+
+  .whatsapp-fab:hover {
+    background-color: #1EBE5D;
+    transform: translateY(-3px) scale(1.04);
+  }
+
+  .wa-fab-pulse {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid #25D366;
+    animation: waPulseRing 2.4s infinite cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .wa-fab-tooltip {
+    position: absolute;
+    right: 72px;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-primary);
+    color: #FFFFFF;
+    font-family: var(--font-heading);
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(10, 34, 57, 0.22);
+    opacity: 0;
+    transform: translateX(8px);
+    pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  @media (min-width: 768px) {
+    .whatsapp-fab:hover .wa-fab-tooltip {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes waPulseRing {
+    0% {
+      transform: scale(1);
+      opacity: 0.75;
+    }
+    100% {
+      transform: scale(1.48);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wa-fab-pulse {
+      animation: none;
+    }
+  }
+</style>
+
