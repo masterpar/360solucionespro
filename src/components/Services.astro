@@ -303,12 +303,17 @@ import { imgSrc, imgSrcSet, imgFallback } from '../data/images';
     display: flex;
     gap: 18px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    overflow-y: visible;
+    scroll-snap-type: x proximity;
     scroll-padding-inline: 4px;
     padding-bottom: 14px;
     margin-inline: -4px;
     padding-inline: 4px;
     scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
   }
 
   .services-grid::-webkit-scrollbar {
@@ -325,6 +330,7 @@ import { imgSrc, imgSrcSet, imgFallback } from '../data/images';
     border: 1px solid rgba(10, 34, 57, 0.05);
     box-shadow: var(--shadow-card);
     overflow: hidden;
+    touch-action: pan-x pan-y;
     transition: transform 0.32s var(--ease-out-expo), box-shadow 0.32s var(--ease-out-expo), border-color 0.25s ease;
   }
 
