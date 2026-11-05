@@ -1,4 +1,9 @@
-name: Deploy to Hostinger
+name: Build for Hostinger
+
+# Compila el sitio Astro y publica SOLO el resultado (dist/) en una rama
+# dedicada. Hostinger (hPanel → Avanzado → Git) clona esa rama en public_html.
+#   push a main  → rama deploy-main
+#   push a test  → rama deploy-test
 
 on:
   push:
@@ -7,12 +12,15 @@ on:
       - test
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
-  group: deploy-hostinger-${{ github.ref }}
+  group: build-hostinger-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
+  build-and-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,16 +41,12 @@ jobs:
         env:
           ASTRO_TELEMETRY_DISABLED: "1"
 
-      - name: Sync files to Hostinger via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Publish dist/ to deploy branch
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 21
-          protocol: ftp
-          server-dir: ${{ secrets.FTP_SERVER_DIR || 'domains/360solucionespro.com/public_html/' }}
-          local-dir: ./dist/
-          log-level: verbose
-          dangerous-clean-slate: false
-
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: deploy-${{ github.ref_name }}
+          force_orphan: true
+          enable_jekyll: true
+          commit_message: "deploy: ${{ github.sha }}"
