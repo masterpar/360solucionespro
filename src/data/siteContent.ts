@@ -17,6 +17,11 @@ export interface DioramaHotspot {
   code: string;
   label: string;
   detail: string;
+  /** Imagen temática opcional para tarjetas 3D con foto en el Hero */
+  image?: string;
+  fallbackImage?: string;
+  imageAlt?: string;
+  href?: string;
   /** Coordenada porcentual horizontal en el diorama (0-100) */
   x: number;
   /** Coordenada porcentual vertical en el diorama (0-100) */
@@ -82,28 +87,40 @@ export const heroDioramaConfig = {
       code: 'EST-360',
       label: 'Ingeniería & Arquitectura',
       detail: 'Diseño estructural · NSR-10',
-      x: 74,
-      y: 30,
+      image: '/images/scene-01-arquitectura-640.webp',
+      fallbackImage: '/images/scene-01-arquitectura.jpg',
+      imageAlt: 'Estudio de arquitectura, planos técnicos y diseño estructural 360° Pro',
+      href: '#recorrido-360',
+      x: 79,
+      y: 23,
       direction: 'left',
-      depth: 1.15,
+      depth: 1.18,
     },
     {
       code: 'B2B-B2G',
       label: 'Contratación Pública y Privada',
       detail: 'Ejecución integral multi-sector',
-      x: 66,
-      y: 55,
+      image: '/images/scene-02-construccion-640.webp',
+      fallbackImage: '/images/scene-02-construccion.jpg',
+      imageAlt: 'Ejecución de construcción, obras civiles y contratación pública y privada',
+      href: '#servicios',
+      x: 69,
+      y: 50,
       direction: 'right',
-      depth: 1.32,
+      depth: 1.38,
     },
     {
       code: 'EXP-25+',
       label: '+25 Años de Respaldo',
       detail: 'Villavicencio · Cobertura Nacional',
+      image: '/images/nosotros-experiencia-640.webp',
+      fallbackImage: '/images/nosotros-experiencia.jpg',
+      imageAlt: 'Equipo directivo con más de 25 años de experiencia profesional',
+      href: '#nosotros',
       x: 78,
-      y: 74,
+      y: 76,
       direction: 'left',
-      depth: 1.48,
+      depth: 1.56,
     },
   ] as DioramaHotspot[],
 };

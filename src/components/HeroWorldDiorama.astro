@@ -55,8 +55,8 @@ const railChapters = [
       <div class="shutter-laser-edge"></div>
     </div>
 
-    <!-- 3. Capa de Hotspots Técnicos 3D con Líneas Conectoras CAD (Beats 00..06) -->
-    <div class="hotspots-stage" aria-hidden="true">
+    <!-- 3. Capa de Tarjetas 3D del Hero (Beat 00) y Hotspots Técnicos CAD (Beats 01..06) -->
+    <div class="hotspots-stage">
       {
         allHotspotGroups.map((group, gIdx) => (
           <div
@@ -65,52 +65,95 @@ const railChapters = [
           >
             {group.hotspots.map((hs, hIdx) => (
               <div
-                class:list={['tech-hotspot', `dir-${hs.direction}`]}
-                style={`left: ${hs.x}%; top: ${hs.y}%; --hs-delay: ${hIdx * 130}ms;`}
+                class:list={[
+                  'tech-hotspot',
+                  `dir-${hs.direction}`,
+                  { 'is-card-3d': Boolean(hs.image) },
+                ]}
+                style={`left: ${hs.x}%; top: ${hs.y}%; --hs-delay: ${hIdx * 160}ms;`}
                 data-sw-hotspot
                 data-hx={hs.x}
                 data-hy={hs.y}
                 data-depth={hs.depth}
+                data-card3d={hs.image ? 'true' : 'false'}
               >
-                <!-- Nodo focal pulsante -->
-                <span class="hs-node">
-                  <span class="hs-ring"></span>
-                  <span class="hs-core"></span>
-                </span>
+                {hs.image ? (
+                  <a
+                    href={hs.href || '#servicios'}
+                    class="hero-card-3d"
+                    style={`--card-delay: ${120 + hIdx * 160}ms;`}
+                  >
+                    <span class="hc3d-glare" aria-hidden="true"></span>
 
-                <!-- Línea conectora CAD a 45° -->
-                <svg
-                  class="hs-leader"
-                  width="64"
-                  height="28"
-                  viewBox="0 0 64 28"
-                  fill="none"
-                >
-                  {hs.direction === 'right' ? (
-                    <path
-                      class="hs-leader-path"
-                      d="M2 26 L20 6 L62 6"
-                      stroke="#FF6B00"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                    />
-                  ) : (
-                    <path
-                      class="hs-leader-path"
-                      d="M62 26 L44 6 L2 6"
-                      stroke="#FF6B00"
-                      stroke-width="1.6"
-                      stroke-linecap="round"
-                    />
-                  )}
-                </svg>
+                    <div class="hc3d-media">
+                      <picture>
+                        <source srcset={hs.image} type="image/webp" />
+                        <img
+                          src={hs.fallbackImage || hs.image}
+                          alt={hs.imageAlt || hs.label}
+                          width="320"
+                          height="180"
+                          loading="eager"
+                          decoding="async"
+                        />
+                      </picture>
+                      <span class="hc3d-media-shade" aria-hidden="true"></span>
+                      <span class="hc3d-badge">
+                        <span class="hc3d-dot" aria-hidden="true"></span>
+                        <span>{hs.code}</span>
+                      </span>
+                      <span class="hc3d-arrow" aria-hidden="true">↗</span>
+                    </div>
 
-                <!-- Etiqueta técnica flotante -->
-                <div class="hs-card">
-                  <span class="hs-code">{hs.code}</span>
-                  <strong class="hs-label">{hs.label}</strong>
-                  <span class="hs-detail">{hs.detail}</span>
-                </div>
+                    <div class="hc3d-body">
+                      <strong class="hc3d-title">{hs.label}</strong>
+                      <span class="hc3d-detail">{hs.detail}</span>
+                    </div>
+                  </a>
+                ) : (
+                  <>
+                    <!-- Nodo focal pulsante -->
+                    <span class="hs-node" aria-hidden="true">
+                      <span class="hs-ring"></span>
+                      <span class="hs-core"></span>
+                    </span>
+
+                    <!-- Línea conectora CAD a 45° -->
+                    <svg
+                      class="hs-leader"
+                      width="64"
+                      height="28"
+                      viewBox="0 0 64 28"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      {hs.direction === 'right' ? (
+                        <path
+                          class="hs-leader-path"
+                          d="M2 26 L20 6 L62 6"
+                          stroke="#FF6B00"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                        />
+                      ) : (
+                        <path
+                          class="hs-leader-path"
+                          d="M62 26 L44 6 L2 6"
+                          stroke="#FF6B00"
+                          stroke-width="1.6"
+                          stroke-linecap="round"
+                        />
+                      )}
+                    </svg>
+
+                    <!-- Etiqueta técnica flotante -->
+                    <div class="hs-card">
+                      <span class="hs-code">{hs.code}</span>
+                      <strong class="hs-label">{hs.label}</strong>
+                      <span class="hs-detail">{hs.detail}</span>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
           </div>
@@ -390,12 +433,13 @@ const railChapters = [
     }
   }
 
-  /* Capa de Hotspots Técnicos 3D */
+  /* Capa de Tarjetas 3D del Hero y Hotspots Técnicos */
   .hotspots-stage {
     position: absolute;
     inset: 0;
-    z-index: 2;
+    z-index: 5;
     pointer-events: none;
+    perspective: 1200px;
     display: none;
   }
 
@@ -409,6 +453,7 @@ const railChapters = [
     position: absolute;
     inset: 0;
     opacity: 0;
+    transform-style: preserve-3d;
     transition: opacity 0.2s linear;
   }
 
@@ -417,6 +462,200 @@ const railChapters = [
     display: flex;
     align-items: center;
     will-change: transform;
+  }
+
+  .tech-hotspot.is-card-3d {
+    margin-left: -136px;
+    margin-top: -68px;
+    transform-style: preserve-3d;
+    perspective: 1100px;
+  }
+
+  /* Tarjetas Flotantes 3D Temáticas del Hero (Beat 00) */
+  .hero-card-3d {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 272px;
+    padding: 8px;
+    border-radius: 16px;
+    background: linear-gradient(
+      145deg,
+      rgba(12, 39, 66, 0.88) 0%,
+      rgba(6, 21, 36, 0.94) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow:
+      0 24px 50px -12px rgba(2, 8, 18, 0.78),
+      0 0 0 1px rgba(255, 107, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    text-decoration: none;
+    transform-style: preserve-3d;
+    pointer-events: none;
+    animation: heroCard3dEnter 1.1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    animation-delay: var(--card-delay, 120ms);
+    transition:
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  .hotspot-group.is-active .hero-card-3d {
+    pointer-events: auto;
+  }
+
+  @keyframes heroCard3dEnter {
+    0% {
+      opacity: 0;
+      transform: translate3d(76px, 44px, -150px) rotateY(-32deg) rotateX(18deg) scale(0.82);
+      filter: blur(8px);
+    }
+    68% {
+      opacity: 1;
+      transform: translate3d(-4px, -3px, 16px) rotateY(4deg) rotateX(-2deg) scale(1.02);
+      filter: blur(0px);
+    }
+    100% {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) rotateY(0deg) rotateX(0deg) scale(1);
+      filter: blur(0px);
+    }
+  }
+
+  .hero-card-3d:hover {
+    border-color: rgba(255, 107, 0, 0.82);
+    box-shadow:
+      0 30px 64px -10px rgba(0, 0, 0, 0.85),
+      0 0 28px rgba(255, 107, 0, 0.36),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+
+  .hc3d-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      220px circle at var(--glare-x, 50%) var(--glare-y, 30%),
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 107, 0, 0.08) 42%,
+      transparent 75%
+    );
+    mix-blend-mode: screen;
+    z-index: 3;
+  }
+
+  .hc3d-media {
+    position: relative;
+    width: 100%;
+    height: 88px;
+    border-radius: 11px;
+    overflow: hidden;
+    background: #061524;
+    transform: translateZ(16px);
+    box-shadow: 0 10px 22px -8px rgba(0, 0, 0, 0.65);
+  }
+
+  .hc3d-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.03);
+    transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero-card-3d:hover .hc3d-media img {
+    transform: scale(1.12);
+  }
+
+  .hc3d-media-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(6, 21, 36, 0.38) 0%,
+      rgba(6, 21, 36, 0.08) 45%,
+      rgba(6, 21, 36, 0.78) 100%
+    );
+  }
+
+  .hc3d-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(6, 21, 36, 0.82);
+    border: 1px solid rgba(255, 107, 0, 0.55);
+    backdrop-filter: blur(8px);
+    font-family: var(--font-heading);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    color: #FFFFFF;
+  }
+
+  .hc3d-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 8px var(--color-accent);
+  }
+
+  .hc3d-arrow {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(6, 21, 36, 0.76);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    color: #FFFFFF;
+    font-size: 0.72rem;
+    font-weight: 700;
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      transform 0.3s ease;
+  }
+
+  .hero-card-3d:hover .hc3d-arrow {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    transform: translate3d(2px, -2px, 0) scale(1.08);
+  }
+
+  .hc3d-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 8px 5px;
+    transform: translateZ(26px);
+  }
+
+  .hc3d-title {
+    font-family: var(--font-heading);
+    font-size: 0.86rem;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
+  }
+
+  .hc3d-detail {
+    font-size: 0.73rem;
+    color: #CBD5E1;
+    line-height: 1.32;
   }
 
   .hs-node {
@@ -543,11 +782,17 @@ const railChapters = [
     display: flex;
     align-items: center;
     padding-bottom: 58px;
+    pointer-events: none;
     will-change: transform, opacity, filter;
   }
 
   .hero-content {
     width: 100%;
+    pointer-events: auto;
+  }
+
+  .hero-stage-wrap[aria-hidden='true'] .hero-content {
+    pointer-events: none;
   }
 
   @media (min-width: 960px) {

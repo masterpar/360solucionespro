@@ -750,7 +750,7 @@ export class ScrollWorldEngine {
         this.heroCopyEl.style.transform = `translate3d(${shiftX.toFixed(1)}px, ${shiftY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
         this.heroCopyEl.style.filter =
           easedCopy > 0.05 ? `blur(${(easedCopy * 7).toFixed(1)}px)` : 'none';
-        this.heroCopyEl.style.pointerEvents = alpha > 0.45 ? 'auto' : 'none';
+        this.heroCopyEl.style.pointerEvents = 'none';
         this.heroCopyEl.setAttribute('aria-hidden', alpha > 0.2 ? 'false' : 'true');
       }
     }
@@ -848,7 +848,9 @@ export class ScrollWorldEngine {
       // Visibility window during active dive
       let groupAlpha = 1;
       if (!this.reducedMotion) {
-        if (groupIdx > 0 && local < 0.14) {
+        if (groupIdx === 0 && local > 0.08) {
+          groupAlpha = 1 - easeInOutSine(clamp((local - 0.08) / 0.48, 0, 1));
+        } else if (groupIdx > 0 && local < 0.14) {
           groupAlpha = easeInOutSine(local / 0.14);
         } else if (!isLast && local > DIVE_SPLIT - 0.06) {
           groupAlpha = 1 - clamp((local - (DIVE_SPLIT - 0.06)) / 0.2, 0, 1);
@@ -858,21 +860,52 @@ export class ScrollWorldEngine {
       group.style.opacity = groupAlpha.toFixed(3);
       group.classList.toggle('is-active', groupAlpha > 0.35);
 
-      // Apply 3D camera projection per individual hotspot pin
+      // Apply 3D camera projection per individual hotspot pin or 3D Hero showcase card
       const pins = group.querySelectorAll<HTMLElement>('[data-sw-hotspot]');
-      pins.forEach((pin) => {
+      pins.forEach((pin, pinIdx) => {
         const hx = parseFloat(pin.dataset.hx || '50') / 100;
         const hy = parseFloat(pin.dataset.hy || '50') / 100;
         const depth = parseFloat(pin.dataset.depth || '1.2');
+        const isCard3d = pin.dataset.card3d === 'true';
 
         const zoomSpreadX = (activeScale - START_SCALE) * (hx - 0.5) * this.logicalWidth * 0.65;
         const zoomSpreadY = (activeScale - START_SCALE) * (hy - 0.5) * this.logicalHeight * 0.65;
         const dx = basePanX * depth + zoomSpreadX;
         const dy = basePanY * depth + zoomSpreadY;
 
-        pin.style.transform = this.reducedMotion
-          ? 'none'
-          : `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+        if (isCard3d && !this.reducedMotion) {
+          // Organic 3D wave + pointer-reactive 3D tilt + scroll portal dispersion
+          const wavePhase = elapsed * 0.0017 + pinIdx * 2.15;
+          const floatX = Math.cos(wavePhase * 0.9) * 7;
+          const floatY = Math.sin(wavePhase) * 9;
+          const floatZ = Math.sin(wavePhase * 0.7) * 18;
+
+          const heroExit = groupIdx === 0 ? clamp((local - 0.04) / 0.54, 0, 1) : 0;
+          const exitX = heroExit * 95 * (pinIdx % 2 === 0 ? 1.15 : 0.75);
+          const exitY = heroExit * (pinIdx - 1) * 38;
+          const exitZ = heroExit * 110;
+
+          const rotY =
+            -this.currentPointerX * 16 * (depth * 0.78) +
+            Math.cos(wavePhase * 0.8) * 6.5 -
+            heroExit * 24;
+          const rotX =
+            this.currentPointerY * 12 * (depth * 0.78) +
+            Math.sin(wavePhase * 0.95) * 4.8 +
+            heroExit * 10;
+          const rotZ = Math.sin(wavePhase * 0.6) * 1.4;
+
+          const glareX = clamp(50 + this.currentPointerX * 42 + Math.cos(wavePhase) * 12, 8, 92);
+          const glareY = clamp(36 + this.currentPointerY * 36 + Math.sin(wavePhase) * 12, 8, 92);
+          pin.style.setProperty('--glare-x', `${glareX.toFixed(1)}%`);
+          pin.style.setProperty('--glare-y', `${glareY.toFixed(1)}%`);
+
+          pin.style.transform = `perspective(1100px) translate3d(${(dx + floatX + exitX).toFixed(1)}px, ${(dy + floatY + exitY).toFixed(1)}px, ${(floatZ + exitZ).toFixed(1)}px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) rotateZ(${rotZ.toFixed(2)}deg)`;
+        } else {
+          pin.style.transform = this.reducedMotion
+            ? 'none'
+            : `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+        }
       });
     });
   }
