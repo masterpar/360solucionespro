@@ -74,6 +74,9 @@ export const heroDioramaConfig = {
   chapterLabel: 'Inicio',
   stillImage: '/images/hero-main-1920.webp',
   fallbackStill: '/images/hero-main.jpg',
+  introVideo: '/videos/hero-intro.mp4',
+  diveVideo: '/videos/dive-00.mp4',
+  connectorVideo: '/videos/conn-00.mp4',
   hotspots: [
     {
       code: 'EST-360',
@@ -119,6 +122,8 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Diseño arquitectónico', 'Planos', 'Ingeniería', 'Urbanismo'],
     stillImage: '/images/scene-01-arquitectura-1920.webp',
     fallbackStill: '/images/scene-01-arquitectura.jpg',
+    diveVideo: '/videos/dive-01.mp4',
+    connectorVideo: '/videos/conn-01.mp4',
     serviceValue: 'Arquitectura e Ingeniería Civil',
     hudPosition: 'left',
     hotspots: [
@@ -155,6 +160,8 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Construcción', 'Infraestructura', 'Adecuaciones', 'Obras civiles'],
     stillImage: '/images/scene-02-construccion-1920.webp',
     fallbackStill: '/images/scene-02-construccion.jpg',
+    diveVideo: '/videos/dive-02.mp4',
+    connectorVideo: '/videos/conn-02.mp4',
     serviceValue: 'Construcción y Obras Civiles',
     hudPosition: 'right',
     hotspots: [
@@ -191,6 +198,8 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Pintura', 'Plomería', 'Electricidad', 'Impermeabilización', 'Drywall'],
     stillImage: '/images/scene-03-mantenimiento-1920.webp',
     fallbackStill: '/images/scene-03-mantenimiento.jpg',
+    diveVideo: '/videos/dive-03.mp4',
+    connectorVideo: '/videos/conn-03.mp4',
     serviceValue: 'Mantenimiento, Reparaciones y Adecuaciones',
     hudPosition: 'left',
     hotspots: [
@@ -227,6 +236,8 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Identidad corporativa', 'Marketing digital', 'Gran formato', 'Señalización'],
     stillImage: '/images/scene-04-publicidad-1920.webp',
     fallbackStill: '/images/scene-04-publicidad.jpg',
+    diveVideo: '/videos/dive-04.mp4',
+    connectorVideo: '/videos/conn-04.mp4',
     serviceValue: 'Publicidad, Diseño Gráfico y Artes Gráficas',
     hudPosition: 'right',
     hotspots: [
@@ -263,6 +274,8 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Diagnósticos', 'Biodiversidad', 'Recursos hídricos', 'Restauración ecológica'],
     stillImage: '/images/scene-05-ambiental-1920.webp',
     fallbackStill: '/images/scene-05-ambiental.jpg',
+    diveVideo: '/videos/dive-05.mp4',
+    connectorVideo: '/videos/conn-05.mp4',
     serviceValue: 'Consultoría y Gestión Ambiental',
     hudPosition: 'left',
     hotspots: [
@@ -299,6 +312,7 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     tags: ['Equipos tecnológicos', 'Herramientas', 'Dotaciones', 'Abastecimiento'],
     stillImage: '/images/scene-06-suministros-1920.webp',
     fallbackStill: '/images/scene-06-suministros.jpg',
+    diveVideo: '/videos/dive-06.mp4',
     serviceValue: 'Suministros y Logística Operativa',
     hudPosition: 'right',
     hotspots: [

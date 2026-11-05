@@ -24,3 +24,5 @@ pnpm-debug.log*
 .idea/
 .vercel
 .env*
+.cache/
+google-flow-kit/frames/

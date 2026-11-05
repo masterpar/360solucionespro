@@ -20,6 +20,7 @@ export interface EngineSceneConfig {
   beatNumber: string;
   stillImage: string;
   fallbackStill: string;
+  introVideo?: string;
   diveVideo?: string;
   connectorVideo?: string;
 }
@@ -58,6 +59,7 @@ export class ScrollWorldEngine {
   private scenes: EngineSceneConfig[];
   private images: (HTMLImageElement | null)[] = [];
   private videoMap: Map<string, HTMLVideoElement> = new Map();
+  private introVideoEl: HTMLVideoElement | null = null;
 
   private heroCopyEl: HTMLElement | null;
   private heroShutterEl: HTMLElement | null;
@@ -160,14 +162,65 @@ export class ScrollWorldEngine {
         }
       };
       img.src = this.pickResponsiveStill(scene.stillImage);
+    });
 
-      if (scene.diveVideo) {
-        this.preloadVideoBlob(`dive-${index}`, scene.diveVideo);
+    void this.preloadAvailableVideos();
+  }
+
+  private async preloadAvailableVideos(): Promise<void> {
+    let available: Set<string> | null = null;
+    try {
+      const res = await fetch('/videos/manifest.json', { cache: 'no-cache' });
+      if (res.ok) {
+        const data = (await res.json()) as { generated?: string[] };
+        if (Array.isArray(data.generated)) {
+          available = new Set(data.generated);
+        }
       }
-      if (scene.connectorVideo) {
-        this.preloadVideoBlob(`conn-${index}`, scene.connectorVideo);
+    } catch {
+      available = null;
+    }
+
+    // Hero live autoplay loop intro video (blends into scroll-world on scroll)
+    const heroIntroUrl = this.scenes[0]?.introVideo;
+    if (heroIntroUrl && (!available || available.has(heroIntroUrl))) {
+      this.preloadIntroLoopVideo(heroIntroUrl);
+    }
+
+    this.scenes.forEach((scene, index) => {
+      if (scene.diveVideo && (!available || available.has(scene.diveVideo))) {
+        void this.preloadVideoBlob(`dive-${index}`, scene.diveVideo);
+      }
+      if (scene.connectorVideo && (!available || available.has(scene.connectorVideo))) {
+        void this.preloadVideoBlob(`conn-${index}`, scene.connectorVideo);
       }
     });
+  }
+
+  private preloadIntroLoopVideo(url: string): void {
+    const video = document.createElement('video');
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.autoplay = !this.reducedMotion;
+    video.preload = 'auto';
+    video.src = url;
+    video.addEventListener(
+      'canplay',
+      () => {
+        if (!this.reducedMotion && this.isVisible && this.currentProgress < 0.06) {
+          void video.play().catch(() => {});
+        }
+      },
+      { once: true }
+    );
+    video.load();
+    this.introVideoEl = video;
+  }
+
+  private hasReadyVideo(key: string): boolean {
+    const video = this.videoMap.get(key);
+    return Boolean(video && video.readyState >= 2 && video.duration > 0);
   }
 
   private pickResponsiveStill(src: string): string {
@@ -330,11 +383,8 @@ export class ScrollWorldEngine {
   }
 
   /**
-   * Renders a Multi-Plane 3D Diorama for a single scene:
-   *  - Plane Z-0: Deep horizon layer (0.5x parallax)
-   *  - Plane Z-1: Main crisp diorama subject (1.0x parallax)
-   *  - Plane Z-2: Outer peripheral depth window (1.85x parallax) creating
-   *               an authentic multi-plane parallax separation on tilt & zoom!
+   * Renders a full-bleed 3D Diorama / Scroll-World video clip for a single scene
+   * without artificial peripheral seams, giving priority to Seam-Rule MP4 clips.
    */
   private drawMultiPlaneScene(
     sceneIdx: number,
@@ -347,12 +397,12 @@ export class ScrollWorldEngine {
   ): void {
     if (alpha <= 0.005) return;
 
-    // Video chain priority (if MP4 blobs dropped in /public/videos)
+    // Video chain priority (Seam-Rule MP4 blobs in /public/videos)
     if (videoKey && videoNormTime !== undefined) {
       const video = this.videoMap.get(videoKey);
       if (video && video.readyState >= 2 && video.duration > 0) {
-        const targetTime = clamp(videoNormTime, 0, 0.998) * video.duration;
-        if (Math.abs(video.currentTime - targetTime) > 0.03) {
+        const targetTime = clamp(videoNormTime, 0, 0.996) * video.duration;
+        if (!video.seeking && Math.abs(video.currentTime - targetTime) > 0.016) {
           video.currentTime = targetTime;
         }
         this.drawCoverSource(
@@ -360,8 +410,8 @@ export class ScrollWorldEngine {
           video.videoWidth || 1920,
           video.videoHeight || 1080,
           1.03,
-          panX * 0.4,
-          panY * 0.4,
+          panX * 0.35,
+          panY * 0.35,
           alpha
         );
         return;
@@ -374,51 +424,8 @@ export class ScrollWorldEngine {
       return;
     }
 
-    const w = this.logicalWidth;
-    const h = this.logicalHeight;
-    const natW = img.naturalWidth;
-    const natH = img.naturalHeight;
-
-    // Plane Z-0 & Z-1: Core diorama subject
-    this.drawCoverSource(img, natW, natH, scale, panX, panY, alpha);
-
-    // Plane Z-2: Foreground peripheral architectural frame (1.85x parallax)
-    if (!this.reducedMotion && w >= 768 && alpha > 0.25) {
-      const insetX = w * 0.13;
-      const insetY = h * 0.13;
-      this.ctx.save();
-      this.ctx.beginPath();
-      // Outer rectangle minus inner diorama window (even-odd rule)
-      this.ctx.rect(0, 0, w, h);
-      this.ctx.roundRect(insetX, insetY, w - insetX * 2, h - insetY * 2, 28);
-      this.ctx.clip('evenodd');
-
-      this.drawCoverSource(
-        img,
-        natW,
-        natH,
-        scale * 1.085,
-        panX * 1.85,
-        panY * 1.85,
-        alpha * 0.65
-      );
-
-      // Subtle bevel border around the inner multi-plane window
-      this.ctx.restore();
-      this.ctx.save();
-      this.ctx.strokeStyle = `rgba(255, 255, 255, ${(0.07 * alpha).toFixed(3)})`;
-      this.ctx.lineWidth = 1;
-      this.ctx.beginPath();
-      this.ctx.roundRect(
-        insetX + panX * 0.35,
-        insetY + panY * 0.35,
-        w - insetX * 2,
-        h - insetY * 2,
-        28
-      );
-      this.ctx.stroke();
-      this.ctx.restore();
-    }
+    // Seamless full-bleed diorama subject (zero peripheral cutout seam)
+    this.drawCoverSource(img, img.naturalWidth, img.naturalHeight, scale, panX, panY, alpha);
   }
 
   /**
@@ -548,6 +555,87 @@ export class ScrollWorldEngine {
     this.ctx.restore();
   }
 
+  /**
+   * Blends the live-playing Hero Intro Video (`hero-intro.mp4`) seamlessly into
+   * the scroll-scrubbed `scroll-world` Z-flight as soon as the user starts scrolling.
+   * Includes a live orbital cinematic motion layer when `hero-intro.mp4` is not yet generated.
+   */
+  private renderHeroIntroBlend(
+    elapsed: number,
+    timeline: number,
+    panX: number,
+    panY: number
+  ): void {
+    const introBlend = this.reducedMotion
+      ? 0
+      : 1 - easeInOutCubic(clamp((timeline - 0.015) / 0.3, 0, 1));
+
+    const introVideo = this.introVideoEl;
+    const introReady = Boolean(introVideo && introVideo.readyState >= 2);
+
+    if (introVideo) {
+      if (introBlend > 0.01 && this.isVisible && !this.reducedMotion) {
+        if (introVideo.paused) {
+          void introVideo.play().catch(() => {});
+        }
+      } else if (!introVideo.paused) {
+        introVideo.pause();
+      }
+    }
+
+    if (introBlend <= 0.005) return;
+
+    // Forward Z-acceleration as the live intro dissolves into scroll-world
+    const pushIntoWorld = (1 - introBlend) * 0.16;
+
+    if (introReady && introVideo) {
+      this.drawCoverSource(
+        introVideo,
+        introVideo.videoWidth || 1920,
+        introVideo.videoHeight || 1080,
+        1.03 + pushIntoWorld,
+        panX * 0.45,
+        panY * 0.45,
+        introBlend
+      );
+      return;
+    }
+
+    // Live orbital drone + golden glass shimmer fallback before hero-intro.mp4 is generated
+    const heroImg = this.images[0];
+    if (heroImg && heroImg.complete && heroImg.naturalWidth > 0) {
+      const orbitScale = 1.065 + Math.sin(elapsed * 0.00068) * 0.032 + pushIntoWorld;
+      const orbitX = Math.sin(elapsed * 0.00052) * 26 + panX;
+      const orbitY = Math.cos(elapsed * 0.00041) * 14 + panY;
+
+      this.drawCoverSource(
+        heroImg,
+        heroImg.naturalWidth,
+        heroImg.naturalHeight,
+        orbitScale,
+        orbitX,
+        orbitY,
+        introBlend
+      );
+
+      // Animated dusk architectural light sweep across the facade
+      const w = this.logicalWidth;
+      const h = this.logicalHeight;
+      const sweepPhase = (elapsed * 0.00014) % 1;
+      const beamX = w * (-0.25 + sweepPhase * 1.5);
+      this.ctx.save();
+      this.ctx.globalAlpha = introBlend * 0.22;
+      this.ctx.globalCompositeOperation = 'screen';
+      const beamGrad = this.ctx.createLinearGradient(beamX - w * 0.22, 0, beamX + w * 0.22, h);
+      beamGrad.addColorStop(0, 'rgba(255, 107, 0, 0)');
+      beamGrad.addColorStop(0.5, 'rgba(255, 168, 92, 0.55)');
+      beamGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
+      this.ctx.fillStyle = beamGrad;
+      this.ctx.fillRect(0, 0, w, h);
+      this.ctx.restore();
+    }
+  }
+
   private renderFrame(elapsed: number): void {
     const w = this.logicalWidth;
     const h = this.logicalHeight;
@@ -569,38 +657,54 @@ export class ScrollWorldEngine {
     const panY = -this.currentPointerY * 15 + idleFloatY;
 
     let inConnector = false;
+    const diveKey = `dive-${sceneIdx}`;
+    const connKey = `conn-${sceneIdx}`;
+    const hasDiveVid = this.hasReadyVideo(diveKey);
+    const hasConnVid = this.hasReadyVideo(connKey);
 
     if (isLastScene || this.reducedMotion) {
       const diveT = this.reducedMotion ? 0.18 : easeInOutSine(local);
       const scale = START_SCALE + diveT * (DIVE_END_SCALE - START_SCALE);
-      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, local);
+      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, diveKey, local);
+    } else if (hasDiveVid && !hasConnVid) {
+      // Direct Google Flow Frames-to-Video clip (Scene i -> Scene i+1 in a single MP4)
+      let videoT: number;
+      if (local <= DIVE_SPLIT) {
+        videoT = (local / DIVE_SPLIT) * 0.38;
+      } else {
+        inConnector = true;
+        const connNorm = (local - DIVE_SPLIT) / (1 - DIVE_SPLIT);
+        videoT = 0.38 + easeInOutSine(connNorm) * 0.62;
+      }
+      this.drawMultiPlaneScene(sceneIdx, 1.03, panX, panY, 1, diveKey, videoT);
     } else if (local <= DIVE_SPLIT) {
       const diveNorm = local / DIVE_SPLIT;
       const eased = easeInOutSine(diveNorm);
       const scale = START_SCALE + eased * (DIVE_END_SCALE - START_SCALE);
-      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, diveNorm);
+      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, diveKey, diveNorm);
     } else {
       // Seamless Multi-Plane Portal Connector (Seam-Rule locked)
       inConnector = true;
       const connNorm = (local - DIVE_SPLIT) / (1 - DIVE_SPLIT);
-      const eased = easeInOutCubic(connNorm);
 
-      // Emerging destination world (lands pixel-exact at START_SCALE = 1.04)
-      const nextScale = PORTAL_IN_START_SCALE + eased * (START_SCALE - PORTAL_IN_START_SCALE);
-      this.drawMultiPlaneScene(sceneIdx + 1, nextScale, panX * 0.6, panY * 0.6, 1);
+      if (hasConnVid) {
+        // True oso95/scroll-world boundary-matched connector clip (firstFrame -> lastFrame)
+        this.drawMultiPlaneScene(sceneIdx, 1.03, panX, panY, 1, connKey, connNorm);
+      } else {
+        const eased = easeInOutCubic(connNorm);
 
-      // Outgoing world rushing past camera lens
-      const outScale = DIVE_END_SCALE + eased * (PORTAL_OUT_SCALE - DIVE_END_SCALE);
-      this.drawMultiPlaneScene(
-        sceneIdx,
-        outScale,
-        panX * 1.4,
-        panY * 1.4,
-        1 - eased,
-        `conn-${sceneIdx}`,
-        connNorm
-      );
+        // Emerging destination world (lands pixel-exact at START_SCALE = 1.04)
+        const nextScale = PORTAL_IN_START_SCALE + eased * (START_SCALE - PORTAL_IN_START_SCALE);
+        this.drawMultiPlaneScene(sceneIdx + 1, nextScale, panX * 0.6, panY * 0.6, 1);
+
+        // Outgoing world rushing past camera lens
+        const outScale = DIVE_END_SCALE + eased * (PORTAL_OUT_SCALE - DIVE_END_SCALE);
+        this.drawMultiPlaneScene(sceneIdx, outScale, panX * 1.4, panY * 1.4, 1 - eased);
+      }
     }
+
+    // Live Hero Intro Video layer that melts seamlessly into scroll-world on scroll
+    this.renderHeroIntroBlend(elapsed, timeline, panX, panY);
 
     this.draw3DCADAndParticles(elapsed, inConnector);
   }
@@ -678,9 +782,13 @@ export class ScrollWorldEngine {
 
     if (this.phaseBadgeEl) {
       const inTransition = !isLast && local > DIVE_SPLIT;
-      this.phaseBadgeEl.textContent = inTransition
-        ? 'PORTAL 3D · VUELO ENTRE ESCENAS'
-        : 'DIORAMA MULTI-PLANO · 360° PRO';
+      if (timeline < 0.28) {
+        this.phaseBadgeEl.textContent = 'INTRO VIDEO EN VIVO · FUSIÓN SCROLL-WORLD';
+      } else if (inTransition) {
+        this.phaseBadgeEl.textContent = 'PORTAL 3D · VUELO ENTRE ESCENAS';
+      } else {
+        this.phaseBadgeEl.textContent = 'SCROLL-WORLD 3D · 360° PRO';
+      }
     }
 
     // 4. Chapter rail buttons (00 Inicio .. 06 Suministros)
