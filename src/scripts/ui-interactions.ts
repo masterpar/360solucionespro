@@ -1,8 +1,12 @@
 /**
  * ============================================================================
- * UI INTERACTIONS & GLOBAL SCROLL-WORLD SECTION CHOREOGRAPHY
+ * UI INTERACTIONS, STICKY 3D STACKING & DYNAMIC DIAGONAL CURTAINS
  * ============================================================================
  */
+
+function clamp(val: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, val));
+}
 
 export function initUIInteractions(): void {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,21 +25,52 @@ export function initUIInteractions(): void {
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.1, rootMargin: '0px 0px -36px 0px' }
     );
     revealEls.forEach((el) => revealObserver.observe(el));
   }
 
-  /* 2. Global scroll scrub: Header progress bar, Hero dive & Parallax layers */
+  /* 2. Sticky-Bottom 3D Section Stacking + Dynamic Diagonal Curtains */
   const headerProgress = document.querySelector<HTMLElement>('[data-header-progress]');
   const headerEl = document.querySelector<HTMLElement>('[data-site-header]');
-  const heroBg = document.querySelector<HTMLElement>('[data-hero-bg]');
   const parallaxItems = document.querySelectorAll<HTMLElement>('[data-sw-parallax]');
+  const dioramaViewport = document.querySelector<HTMLElement>('.diorama-sticky-viewport');
+
+  const stackSheets = Array.from(document.querySelectorAll<HTMLElement>('[data-stack-sheet]'));
+  const sheetInners = stackSheets.map((s) => s.querySelector<HTMLElement>('.stack-sheet-inner'));
+  const sheetVeils = stackSheets.map((s) => s.querySelector<HTMLElement>('.stack-dim-veil'));
+  const sheetCurtains = stackSheets.map((s) => s.querySelector<HTMLElement>('.diagonal-curtain'));
+
+  // Recompute sticky `top` so tall sections scroll completely to their bottom before pinning
+  const updateStickyOffsets = () => {
+    if (reducedMotion) return;
+    const vh = window.innerHeight;
+    stackSheets.forEach((sheet, idx) => {
+      // Last sheet (Contact + Footer) flows naturally to the end of document
+      if (idx === stackSheets.length - 1) {
+        sheet.style.position = 'relative';
+        sheet.style.top = 'auto';
+        return;
+      }
+      const h = sheet.offsetHeight;
+      const stickyTop = Math.min(82, vh - h);
+      sheet.style.position = 'sticky';
+      sheet.style.top = `${stickyTop}px`;
+    });
+  };
+
+  if (!reducedMotion && stackSheets.length > 0) {
+    updateStickyOffsets();
+    const ro = new ResizeObserver(() => updateStickyOffsets());
+    stackSheets.forEach((sheet) => ro.observe(sheet));
+    window.addEventListener('resize', updateStickyOffsets, { passive: true });
+  }
 
   const updateScrollEffects = () => {
     const scrollY = window.scrollY;
-    const docHeight = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-    const pageProgress = Math.min(1, Math.max(0, scrollY / docHeight));
+    const vh = window.innerHeight;
+    const docHeight = Math.max(1, document.documentElement.scrollHeight - vh);
+    const pageProgress = clamp(scrollY / docHeight, 0, 1);
 
     if (headerProgress) {
       headerProgress.style.transform = `scaleX(${pageProgress.toFixed(4)})`;
@@ -45,23 +80,74 @@ export function initUIInteractions(): void {
       headerEl.classList.toggle('is-scrolled', scrollY > 18);
     }
 
-    if (!reducedMotion && heroBg && scrollY < window.innerHeight * 1.3) {
-      const heroRatio = Math.min(1, scrollY / window.innerHeight);
-      const scale = 1 + heroRatio * 0.14;
-      const translateY = scrollY * 0.22;
-      heroBg.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-    }
-
     if (!reducedMotion) {
+      // Parallax inner photos (e.g., About +25 Años collage)
       parallaxItems.forEach((item) => {
         const speed = parseFloat(item.dataset.swParallax || '0.08');
         const rect = item.getBoundingClientRect();
-        if (rect.bottom > -100 && rect.top < window.innerHeight + 100) {
-          const centerOffset = rect.top + rect.height * 0.5 - window.innerHeight * 0.5;
+        if (rect.bottom > -120 && rect.top < vh + 120) {
+          const centerOffset = rect.top + rect.height * 0.5 - vh * 0.5;
           const shift = -centerOffset * speed;
           item.style.transform = `translate3d(0, ${shift.toFixed(1)}px, 0)`;
         }
       });
+
+      // Transition 0: Diorama World recedes in 3D as Sheet 0 (#servicios) glides over it
+      if (dioramaViewport && stackSheets[0]) {
+        const firstSheetTop = stackSheets[0].getBoundingClientRect().top;
+        const cover0 = clamp((vh - firstSheetTop) / Math.max(1, vh - 82), 0, 1);
+
+        if (cover0 > 0.002) {
+          const scale0 = 1 - cover0 * 0.065;
+          const radius0 = cover0 * 26;
+          const bright0 = 1 - cover0 * 0.38;
+          dioramaViewport.style.transform = `scale(${scale0.toFixed(4)})`;
+          dioramaViewport.style.borderRadius = `0 0 ${radius0.toFixed(1)}px ${radius0.toFixed(1)}px`;
+          dioramaViewport.style.filter = `brightness(${bright0.toFixed(3)})`;
+        } else {
+          dioramaViewport.style.transform = '';
+          dioramaViewport.style.borderRadius = '';
+          dioramaViewport.style.filter = '';
+        }
+
+        if (sheetCurtains[0]) {
+          const slant0 = 1 - cover0;
+          sheetCurtains[0].style.setProperty('--curtain-slant', slant0.toFixed(3));
+        }
+      }
+
+      // Transitions 1..N: Each stacked sheet recedes in 3D as the next sheet slides over it
+      for (let i = 0; i < stackSheets.length - 1; i++) {
+        const nextSheet = stackSheets[i + 1];
+        const inner = sheetInners[i];
+        const veil = sheetVeils[i];
+        const nextCurtain = sheetCurtains[i + 1];
+
+        const nextTop = nextSheet.getBoundingClientRect().top;
+        const cover = clamp((vh - nextTop) / Math.max(1, vh - 82), 0, 1);
+
+        if (inner) {
+          if (cover > 0.002) {
+            const scale = 1 - cover * 0.055;
+            const shiftY = -cover * 16;
+            const radius = cover * 26;
+            inner.style.transform = `translate3d(0, ${shiftY.toFixed(1)}px, 0) scale(${scale.toFixed(4)})`;
+            inner.style.borderRadius = `${radius.toFixed(1)}px`;
+          } else {
+            inner.style.transform = '';
+            inner.style.borderRadius = '';
+          }
+        }
+
+        if (veil) {
+          veil.style.opacity = (cover * 0.44).toFixed(3);
+        }
+
+        if (nextCurtain) {
+          const slant = 1 - cover;
+          nextCurtain.style.setProperty('--curtain-slant', slant.toFixed(3));
+        }
+      }
     }
   };
 
@@ -70,23 +156,57 @@ export function initUIInteractions(): void {
   });
   updateScrollEffects();
 
-  /* 3. Active navigation indicator in Header */
+  /* 3. Flow-Anchor Smooth Navigation & Active Header Tracking (Immune to Sticky Offsets) */
+  const flowAnchorMap = new Map<string, HTMLElement>();
+  document.querySelectorAll<HTMLElement>('[data-anchor-for]').forEach((el) => {
+    const key = el.dataset.anchorFor;
+    if (key) flowAnchorMap.set(key, el);
+  });
+
+  const getTrueSectionTop = (id: string): number => {
+    if (id === 'inicio') return 0;
+    const flowMarker = flowAnchorMap.get(id);
+    if (flowMarker) {
+      return window.scrollY + flowMarker.getBoundingClientRect().top - 80;
+    }
+    const target = document.getElementById(id);
+    if (target) {
+      return window.scrollY + target.getBoundingClientRect().top - 80;
+    }
+    return 0;
+  };
+
+  // Intercept internal hash links so jumping up or down across sticky sheets is pixel-exact
+  document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((anchor) => {
+    anchor.addEventListener('click', (e) => {
+      const href = anchor.getAttribute('href');
+      if (!href || href === '#') return;
+      const id = href.slice(1);
+      if (!flowAnchorMap.has(id) && !document.getElementById(id)) return;
+
+      e.preventDefault();
+      const destinationY = Math.max(0, getTrueSectionTop(id));
+      window.scrollTo({
+        top: destinationY,
+        behavior: reducedMotion ? 'auto' : 'smooth',
+      });
+      history.pushState(null, '', href);
+    });
+  });
+
   const navAnchors = document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]');
-  const trackedSections = ['inicio', 'servicios', 'nosotros', 'por-que-elegirnos', 'contacto']
-    .map((id) => document.getElementById(id))
-    .filter((el): el is HTMLElement => Boolean(el));
+  const trackedIds = ['inicio', 'servicios', 'nosotros', 'por-que-elegirnos', 'contacto'];
 
   const updateActiveNav = () => {
-    const marker = window.scrollY + 180;
+    const marker = window.scrollY + 200;
     let activeId = 'inicio';
 
-    for (const sec of trackedSections) {
-      if (sec.offsetTop <= marker) {
-        activeId = sec.id;
+    for (const id of trackedIds) {
+      if (getTrueSectionTop(id) <= marker) {
+        activeId = id;
       }
     }
 
-    // Map #por-que-elegirnos to #nosotros in simplified 4-item header
     const mappedId = activeId === 'por-que-elegirnos' ? 'nosotros' : activeId;
 
     navAnchors.forEach((link) => {
@@ -182,7 +302,7 @@ export function initUIInteractions(): void {
     });
   });
 
-  /* 7. Image graceful fallback handler for corporate <img> tags */
+  /* 7. Image graceful fallback handler */
   const fallbackImgs = document.querySelectorAll<HTMLImageElement>('img[data-fallback]');
   fallbackImgs.forEach((img) => {
     const applyFallback = () => {
@@ -241,4 +361,3 @@ export function initUIInteractions(): void {
     quoteForm.hidden = false;
   });
 }
-

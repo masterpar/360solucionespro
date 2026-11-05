@@ -296,9 +296,109 @@ textarea:focus-visible {
   transform: translate3d(0, 0, 0) scale(1);
 }
 
+/* ==========================================================================
+   STICKY STACKING 3D SHEETS & CORTINAS DIAGONALES DINÁMICAS
+   ========================================================================== */
+.stack-stage-bg {
+  position: relative;
+  background-color: #061524;
+}
+
+.stack-flow-anchor {
+  position: relative;
+  display: block;
+  height: 0;
+  width: 100%;
+  scroll-margin-top: 84px;
+  pointer-events: none;
+}
+
+.stack-sheet {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  will-change: top;
+}
+
+.stack-sheet-inner {
+  position: relative;
+  width: 100%;
+  transform-origin: center calc(100% - 50vh);
+  box-shadow: 0 -26px 64px -12px rgba(6, 21, 36, 0.45);
+  will-change: transform, border-radius;
+}
+
+.stack-sheet-clip {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.stack-sheet-surface-ice .stack-sheet-inner {
+  background-color: var(--bg-surface);
+}
+
+.stack-sheet-surface-white .stack-sheet-inner {
+  background-color: var(--bg-light);
+}
+
+.stack-sheet-surface-navy .stack-sheet-inner {
+  background-color: var(--color-primary);
+}
+
+/* Velo de profundidad que oscurece suavemente la sección saliente al ser cubierta */
+.stack-dim-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  background: #040E1A;
+  opacity: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  will-change: opacity;
+}
+
+/* Cortina Diagonal Arquitectónica en la cresta superior de cada sección */
+.diagonal-curtain {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 36px;
+  pointer-events: none;
+  transform-origin: bottom center;
+  transform: scaleY(var(--curtain-slant, 1));
+  will-change: transform;
+  z-index: 4;
+  margin-bottom: -1px;
+}
+
+@media (min-width: 1024px) {
+  .diagonal-curtain {
+    height: 62px;
+  }
+}
+
+.diagonal-curtain svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .stack-sheet {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .diagonal-curtain {
+    transform: none !important;
   }
 
   [data-sw-reveal] {

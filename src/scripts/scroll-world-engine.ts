@@ -1,15 +1,18 @@
 /**
  * ============================================================================
- * SCROLL-WORLD SCRUB ENGINE (Adapted from oso95/scroll-world architecture)
+ * 360° PRO — MULTI-PLANE 3D DIORAMA & SCROLL-WORLD ENGINE
  * ============================================================================
- * Maps vertical scroll coordinates deterministically to camera flight time:
- *   scroll position === camera timestamp / scene timeline
+ * Unifies Beat 00 (Dynamic Architectural Hero) + Beats 01..06 (Service Worlds)
+ * into a single continuous 3D camera flight (`scrollY === camera Z-timeline`).
  *
- * Dual-Mode Architecture:
- * 1. Video Chain Mode (`diveVideo` + `connectorVideo` blobs, frame-exact seams)
- * 2. High-DPI 3D Perspective Canvas Flight Mode (active immediately with
- *    thematic stills, enforcing the Seam Rule so end-scale of Connector[i]
- *    equals exact start-scale of Dive[i+1] = 1.03x with zero cuts or pops).
+ * Layers rendered per frame:
+ *  - Plane Z-0: Deep horizon atmospheric backdrop (0.5x parallax + idle drift)
+ *  - Plane Z-1: Core diorama high-res subject (1.0x dive + Seam-Rule portal)
+ *  - Plane Z-2: Multi-plane peripheral depth frame (1.85x parallax) + 3D CAD
+ *               perspective corridor rings & vanishing lines
+ *  - Plane Z-3: True (x/z, y/z) volumetric particles reactive to scroll speed
+ *  - DOM Layer: 3D-tracked Technical Hotspots with CAD leader lines + Hero
+ *               diagonal shutter choreography + Chapter Beat Cards
  */
 
 export interface EngineSceneConfig {
@@ -21,11 +24,20 @@ export interface EngineSceneConfig {
   connectorVideo?: string;
 }
 
-const DIVE_SPLIT = 0.66; // 66% scene dive-in, 34% seamless connector flight
-const START_SCALE = 1.03;
-const DIVE_END_SCALE = 1.36;
-const PORTAL_OUT_SCALE = 2.45;
-const PORTAL_IN_START_SCALE = 0.84;
+interface Particle3D {
+  x: number;
+  y: number;
+  z: number;
+  size: number;
+  isAccent: boolean;
+}
+
+const DIVE_SPLIT = 0.65;
+const START_SCALE = 1.04;
+const DIVE_END_SCALE = 1.38;
+const PORTAL_OUT_SCALE = 2.52;
+const PORTAL_IN_START_SCALE = 0.82;
+const PARTICLE_COUNT = 44;
 
 function clamp(val: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, val));
@@ -47,20 +59,29 @@ export class ScrollWorldEngine {
   private images: (HTMLImageElement | null)[] = [];
   private videoMap: Map<string, HTMLVideoElement> = new Map();
 
+  private heroCopyEl: HTMLElement | null;
+  private heroShutterEl: HTMLElement | null;
+  private hudTopEl: HTMLElement | null;
   private beatEls: HTMLElement[] = [];
+  private hotspotGroups: HTMLElement[] = [];
   private chapterBtns: HTMLElement[] = [];
   private progressFillEl: HTMLElement | null;
   private degreeReadoutEl: HTMLElement | null;
   private sceneCounterEl: HTMLElement | null;
   private phaseBadgeEl: HTMLElement | null;
 
+  private particles: Particle3D[] = [];
   private targetProgress = 0;
   private currentProgress = 0;
+  private prevProgress = 0;
+  private scrollVelocity = 0;
+
   private pointerX = 0;
   private pointerY = 0;
   private currentPointerX = 0;
   private currentPointerY = 0;
 
+  private startTime = performance.now();
   private rafId: number | null = null;
   private isVisible = true;
   private reducedMotion = false;
@@ -82,7 +103,13 @@ export class ScrollWorldEngine {
     }
     this.ctx = context;
 
+    this.heroCopyEl = trackEl.querySelector<HTMLElement>('[data-sw-hero-copy]');
+    this.heroShutterEl = trackEl.querySelector<HTMLElement>('[data-sw-hero-shutter]');
+    this.hudTopEl = trackEl.querySelector<HTMLElement>('[data-sw-hud-top]');
     this.beatEls = Array.from(trackEl.querySelectorAll<HTMLElement>('[data-sw-beat]'));
+    this.hotspotGroups = Array.from(
+      trackEl.querySelectorAll<HTMLElement>('[data-sw-hotspot-group]')
+    );
     this.chapterBtns = Array.from(trackEl.querySelectorAll<HTMLElement>('[data-sw-jump]'));
     this.progressFillEl = trackEl.querySelector<HTMLElement>('[data-sw-progress-fill]');
     this.degreeReadoutEl = trackEl.querySelector<HTMLElement>('[data-sw-degree]');
@@ -91,12 +118,27 @@ export class ScrollWorldEngine {
 
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    this.initParticles();
     this.initAssets();
     this.handleResize();
     this.bindEvents();
     this.updateTargetScroll();
     this.currentProgress = this.targetProgress;
+    this.prevProgress = this.currentProgress;
     this.startLoop();
+  }
+
+  private initParticles(): void {
+    this.particles = [];
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      this.particles.push({
+        x: (Math.random() - 0.5) * 2.2,
+        y: (Math.random() - 0.5) * 1.6,
+        z: 0.12 + Math.random() * 0.88,
+        size: 1.1 + Math.random() * 2.1,
+        isAccent: i % 4 === 0,
+      });
+    }
   }
 
   private initAssets(): void {
@@ -107,22 +149,18 @@ export class ScrollWorldEngine {
       img.decoding = 'async';
       img.onload = () => {
         this.images[index] = img;
-        this.renderFrame();
       };
       img.onerror = () => {
         if (scene.fallbackStill && img.src !== scene.fallbackStill) {
           const fallback = new Image();
-          fallback.crossOrigin = 'anonymous';
           fallback.onload = () => {
             this.images[index] = fallback;
-            this.renderFrame();
           };
           fallback.src = scene.fallbackStill;
         }
       };
       img.src = this.pickResponsiveStill(scene.stillImage);
 
-      // Preload optional oso95/scroll-world MP4 blobs if configured
       if (scene.diveVideo) {
         this.preloadVideoBlob(`dive-${index}`, scene.diveVideo);
       }
@@ -132,7 +170,6 @@ export class ScrollWorldEngine {
     });
   }
 
-  /** Selecciona la variante WebP adecuada (640/1280/1920/2560) según el ancho físico del viewport */
   private pickResponsiveStill(src: string): string {
     const match = src.match(/^(.*)-(\d+)\.webp$/);
     if (!match) return src;
@@ -155,7 +192,7 @@ export class ScrollWorldEngine {
       video.load();
       this.videoMap.set(key, video);
     } catch {
-      // Gracefully fall back to 3D still-frame camera flight
+      // Fallback to multi-plane diorama stills
     }
   }
 
@@ -164,26 +201,24 @@ export class ScrollWorldEngine {
     window.addEventListener('resize', () => {
       this.handleResize();
       this.updateTargetScroll();
-      this.renderFrame();
     });
 
-    this.trackEl.addEventListener(
+    window.addEventListener(
       'pointermove',
       (e: PointerEvent) => {
-        if (this.reducedMotion) return;
-        const rect = this.canvas.getBoundingClientRect();
-        this.pointerX = ((e.clientX - rect.left) / Math.max(1, rect.width) - 0.5) * 2;
-        this.pointerY = ((e.clientY - rect.top) / Math.max(1, rect.height) - 0.5) * 2;
+        if (this.reducedMotion || !this.isVisible) return;
+        this.pointerX = (e.clientX / Math.max(1, window.innerWidth) - 0.5) * 2;
+        this.pointerY = (e.clientY / Math.max(1, window.innerHeight) - 0.5) * 2;
       },
       { passive: true }
     );
 
-    // Interactive chapter jump buttons on the HUD scrub rail
+    // Interactive chapter jump buttons (00 Hero .. 06 Services)
     this.chapterBtns.forEach((btn) => {
       btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.swJump || '0');
         const total = this.scenes.length;
-        const desiredProgress = clamp((idx + 0.22) / total, 0, 0.98);
+        const desiredProgress = idx === 0 ? 0 : clamp((idx + 0.22) / total, 0, 0.985);
         const rect = this.trackEl.getBoundingClientRect();
         const trackTop = window.scrollY + rect.top;
         const scrollable = Math.max(1, this.trackEl.offsetHeight - window.innerHeight);
@@ -194,14 +229,13 @@ export class ScrollWorldEngine {
       });
     });
 
-    // Pause heavy rendering when completely off-screen
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           this.isVisible = entry.isIntersecting;
         });
       },
-      { rootMargin: '250px 0px' }
+      { rootMargin: '300px 0px' }
     );
     observer.observe(this.trackEl);
   }
@@ -225,19 +259,24 @@ export class ScrollWorldEngine {
   }
 
   private startLoop(): void {
-    const tick = () => {
+    const tick = (now: number) => {
       if (this.isVisible) {
-        const lerpFactor = this.reducedMotion ? 1 : 0.11;
+        const lerpFactor = this.reducedMotion ? 1 : 0.1;
+        this.prevProgress = this.currentProgress;
         this.currentProgress += (this.targetProgress - this.currentProgress) * lerpFactor;
-        this.currentPointerX += (this.pointerX - this.currentPointerX) * 0.08;
-        this.currentPointerY += (this.pointerY - this.currentPointerY) * 0.08;
-
-        if (Math.abs(this.targetProgress - this.currentProgress) < 0.0001) {
+        if (Math.abs(this.targetProgress - this.currentProgress) < 0.00008) {
           this.currentProgress = this.targetProgress;
         }
 
-        this.renderFrame();
-        this.syncHUD();
+        const rawVel = (this.currentProgress - this.prevProgress) * 100;
+        this.scrollVelocity += (rawVel - this.scrollVelocity) * 0.18;
+
+        this.currentPointerX += (this.pointerX - this.currentPointerX) * 0.07;
+        this.currentPointerY += (this.pointerY - this.currentPointerY) * 0.07;
+
+        const elapsed = now - this.startTime;
+        this.renderFrame(elapsed);
+        this.syncDOM(elapsed);
       }
       this.rafId = requestAnimationFrame(tick);
     };
@@ -274,34 +313,41 @@ export class ScrollWorldEngine {
     const h = this.logicalHeight;
     this.ctx.save();
     this.ctx.globalAlpha = alpha;
-
     const grad = this.ctx.createRadialGradient(
-      w * 0.5,
+      w * 0.55,
       h * 0.45,
       40 * scale,
       w * 0.5,
       h * 0.5,
-      Math.max(w, h) * 0.75
+      Math.max(w, h) * 0.8
     );
-    const isEven = index % 2 === 0;
-    grad.addColorStop(0, isEven ? '#184A78' : '#243B55');
-    grad.addColorStop(0.55, '#0D2B49');
+    grad.addColorStop(0, index % 2 === 0 ? '#184A78' : '#1E3A5F');
+    grad.addColorStop(0.6, '#0A2239');
     grad.addColorStop(1, '#061524');
     this.ctx.fillStyle = grad;
     this.ctx.fillRect(0, 0, w, h);
     this.ctx.restore();
   }
 
-  private drawSceneLayer(
+  /**
+   * Renders a Multi-Plane 3D Diorama for a single scene:
+   *  - Plane Z-0: Deep horizon layer (0.5x parallax)
+   *  - Plane Z-1: Main crisp diorama subject (1.0x parallax)
+   *  - Plane Z-2: Outer peripheral depth window (1.85x parallax) creating
+   *               an authentic multi-plane parallax separation on tilt & zoom!
+   */
+  private drawMultiPlaneScene(
     sceneIdx: number,
     scale: number,
-    offsetX: number,
-    offsetY: number,
+    panX: number,
+    panY: number,
     alpha: number,
     videoKey?: string,
     videoNormTime?: number
   ): void {
-    // 1. Prefer oso95/scroll-world preloaded video clip if present
+    if (alpha <= 0.005) return;
+
+    // Video chain priority (if MP4 blobs dropped in /public/videos)
     if (videoKey && videoNormTime !== undefined) {
       const video = this.videoMap.get(videoKey);
       if (video && video.readyState >= 2 && video.duration > 0) {
@@ -313,83 +359,196 @@ export class ScrollWorldEngine {
           video,
           video.videoWidth || 1920,
           video.videoHeight || 1080,
-          1.02,
-          offsetX * 0.35,
-          offsetY * 0.35,
+          1.03,
+          panX * 0.4,
+          panY * 0.4,
           alpha
         );
         return;
       }
     }
 
-    // 2. Render high-resolution perspective still with 3D camera matrix
     const img = this.images[sceneIdx];
-    if (img && img.complete && img.naturalWidth > 0) {
+    if (!img || !img.complete || img.naturalWidth === 0) {
+      this.drawPlaceholderScene(sceneIdx, scale, alpha);
+      return;
+    }
+
+    const w = this.logicalWidth;
+    const h = this.logicalHeight;
+    const natW = img.naturalWidth;
+    const natH = img.naturalHeight;
+
+    // Plane Z-0 & Z-1: Core diorama subject
+    this.drawCoverSource(img, natW, natH, scale, panX, panY, alpha);
+
+    // Plane Z-2: Foreground peripheral architectural frame (1.85x parallax)
+    if (!this.reducedMotion && w >= 768 && alpha > 0.25) {
+      const insetX = w * 0.13;
+      const insetY = h * 0.13;
+      this.ctx.save();
+      this.ctx.beginPath();
+      // Outer rectangle minus inner diorama window (even-odd rule)
+      this.ctx.rect(0, 0, w, h);
+      this.ctx.roundRect(insetX, insetY, w - insetX * 2, h - insetY * 2, 28);
+      this.ctx.clip('evenodd');
+
       this.drawCoverSource(
         img,
-        img.naturalWidth,
-        img.naturalHeight,
-        scale,
-        offsetX,
-        offsetY,
-        alpha
+        natW,
+        natH,
+        scale * 1.085,
+        panX * 1.85,
+        panY * 1.85,
+        alpha * 0.65
       );
-    } else {
-      this.drawPlaceholderScene(sceneIdx, scale, alpha);
+
+      // Subtle bevel border around the inner multi-plane window
+      this.ctx.restore();
+      this.ctx.save();
+      this.ctx.strokeStyle = `rgba(255, 255, 255, ${(0.07 * alpha).toFixed(3)})`;
+      this.ctx.lineWidth = 1;
+      this.ctx.beginPath();
+      this.ctx.roundRect(
+        insetX + panX * 0.35,
+        insetY + panY * 0.35,
+        w - insetX * 2,
+        h - insetY * 2,
+        28
+      );
+      this.ctx.stroke();
+      this.ctx.restore();
     }
   }
 
-  private drawArchitecturalReticle(globalProgress: number, isConnector: boolean): void {
+  /**
+   * Renders 3D CAD perspective tunnel lines, vanishing crosshairs,
+   * and volumetric Z-space particles that fly past the camera!
+   */
+  private draw3DCADAndParticles(elapsed: number, isConnector: boolean): void {
     const w = this.logicalWidth;
     const h = this.logicalHeight;
-    const cx = w * 0.5;
-    const cy = h * 0.5;
+    const cx = w * 0.5 - this.currentPointerX * 22;
+    const cy = h * 0.5 - this.currentPointerY * 15;
 
     this.ctx.save();
 
-    // Executive atmospheric depth vignette so HUD copy always has AAA contrast
+    // 1. Executive depth vignette for contrast
     const vignette = this.ctx.createRadialGradient(
       cx,
       cy,
       Math.min(w, h) * 0.18,
-      cx,
-      cy,
+      w * 0.5,
+      h * 0.5,
       Math.max(w, h) * 0.78
     );
-    vignette.addColorStop(0, 'rgba(10, 34, 57, 0.12)');
-    vignette.addColorStop(0.62, 'rgba(10, 34, 57, 0.48)');
+    vignette.addColorStop(0, 'rgba(10, 34, 57, 0.08)');
+    vignette.addColorStop(0.62, 'rgba(10, 34, 57, 0.44)');
     vignette.addColorStop(1, 'rgba(6, 21, 36, 0.84)');
     this.ctx.fillStyle = vignette;
     this.ctx.fillRect(0, 0, w, h);
 
-    // Top & bottom subtle gradient bands for seamless section entry/exit
-    const topBand = this.ctx.createLinearGradient(0, 0, 0, 140);
-    topBand.addColorStop(0, 'rgba(6, 21, 36, 0.68)');
-    topBand.addColorStop(1, 'rgba(6, 21, 36, 0)');
-    this.ctx.fillStyle = topBand;
-    this.ctx.fillRect(0, 0, w, 140);
+    // 2. 3D CAD Perspective Corridor Rings receding in Z-space
+    if (!this.reducedMotion) {
+      const zFlow = (this.currentProgress * this.scenes.length * 1.5 + elapsed * 0.00008) % 1;
 
-    // Subtle 3D perspective architectural frame lines
-    const pulse = isConnector ? 0.16 : 0.08;
-    this.ctx.strokeStyle = `rgba(255, 255, 255, ${pulse})`;
-    this.ctx.lineWidth = 1;
-
-    const ringRadius = Math.min(w, h) * (0.22 + ((globalProgress * 6) % 1) * 0.12);
-    this.ctx.beginPath();
-    this.ctx.arc(cx, cy, ringRadius, 0, Math.PI * 2);
-    this.ctx.stroke();
-
-    if (isConnector) {
-      this.ctx.strokeStyle = 'rgba(255, 107, 0, 0.24)';
+      // Vanishing diagonal rays
+      this.ctx.strokeStyle = isConnector
+        ? 'rgba(255, 107, 0, 0.14)'
+        : 'rgba(255, 255, 255, 0.06)';
+      this.ctx.lineWidth = 1;
+      const corners = [
+        [0, 0],
+        [w, 0],
+        [w, h],
+        [0, h],
+      ];
       this.ctx.beginPath();
-      this.ctx.arc(cx, cy, ringRadius * 0.68, 0, Math.PI * 2);
+      for (const [qx, qy] of corners) {
+        const dx = qx - cx;
+        const dy = qy - cy;
+        this.ctx.moveTo(cx + dx * 0.16, cy + dy * 0.16);
+        this.ctx.lineTo(qx, qy);
+      }
       this.ctx.stroke();
+
+      // 3 perspective depth frames expanding toward viewer
+      for (let r = 0; r < 3; r++) {
+        const depthPhase = (zFlow + r / 3) % 1;
+        const perspectiveScale = Math.pow(depthPhase, 2.1); // True 1/Z perspective acceleration
+        const rw = w * (0.14 + perspectiveScale * 0.92);
+        const rh = h * (0.14 + perspectiveScale * 0.92);
+        const rx = cx - rw * 0.5;
+        const ry = cy - rh * 0.5;
+        const frameAlpha = Math.sin(depthPhase * Math.PI) * (isConnector ? 0.22 : 0.09);
+
+        this.ctx.strokeStyle =
+          r === 0 && isConnector
+            ? `rgba(255, 107, 0, ${frameAlpha.toFixed(3)})`
+            : `rgba(255, 255, 255, ${frameAlpha.toFixed(3)})`;
+        this.ctx.strokeRect(rx, ry, rw, rh);
+      }
+
+      // Subtle CAD laser scanline during Hero / active inspection
+      const scanY = ((elapsed * 0.045) % (h + 120)) - 60;
+      const scanGrad = this.ctx.createLinearGradient(0, scanY - 24, 0, scanY + 24);
+      scanGrad.addColorStop(0, 'rgba(255, 107, 0, 0)');
+      scanGrad.addColorStop(0.5, 'rgba(255, 107, 0, 0.09)');
+      scanGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
+      this.ctx.fillStyle = scanGrad;
+      this.ctx.fillRect(0, scanY - 24, w, 48);
+
+      // 3. Volumetric 3D Z-Space Particles
+      const speedBoost = this.scrollVelocity * 0.085;
+      const baseDrift = 0.0014;
+      const spread = Math.max(w, h) * 0.62;
+
+      for (const p of this.particles) {
+        p.z -= baseDrift + speedBoost;
+        if (p.z <= 0.08) {
+          p.z += 0.92;
+          p.x = (Math.random() - 0.5) * 2.2;
+          p.y = (Math.random() - 0.5) * 1.6;
+        } else if (p.z > 1.0) {
+          p.z -= 0.92;
+        }
+
+        const invZ = 1 / p.z;
+        const sx = cx + p.x * invZ * spread * 0.45;
+        const sy = cy + p.y * invZ * spread * 0.45;
+
+        if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) continue;
+
+        const proximityAlpha = clamp((1 - p.z) * 0.65, 0.05, 0.58);
+        const radius = clamp(p.size * invZ * 0.42, 0.8, 3.8);
+
+        this.ctx.fillStyle = p.isAccent
+          ? `rgba(255, 107, 0, ${proximityAlpha.toFixed(3)})`
+          : `rgba(248, 250, 252, ${(proximityAlpha * 0.75).toFixed(3)})`;
+
+        // Radial streak when scrolling rapidly through portals
+        if (Math.abs(speedBoost) > 0.006) {
+          const prevInvZ = 1 / clamp(p.z + speedBoost * 2.2, 0.1, 1.2);
+          const px = cx + p.x * prevInvZ * spread * 0.45;
+          const py = cy + p.y * prevInvZ * spread * 0.45;
+          this.ctx.strokeStyle = this.ctx.fillStyle;
+          this.ctx.lineWidth = radius * 0.85;
+          this.ctx.beginPath();
+          this.ctx.moveTo(px, py);
+          this.ctx.lineTo(sx, sy);
+          this.ctx.stroke();
+        } else {
+          this.ctx.beginPath();
+          this.ctx.arc(sx, sy, radius, 0, Math.PI * 2);
+          this.ctx.fill();
+        }
+      }
     }
 
     this.ctx.restore();
   }
 
-  private renderFrame(): void {
+  private renderFrame(elapsed: number): void {
     const w = this.logicalWidth;
     const h = this.logicalHeight;
     if (w <= 0 || h <= 0) return;
@@ -403,56 +562,106 @@ export class ScrollWorldEngine {
     const local = timeline - sceneIdx;
     const isLastScene = sceneIdx >= total - 1;
 
-    const panX = -this.currentPointerX * 18;
-    const panY = -this.currentPointerY * 12;
+    // Subtle idle architectural breathing + pointer 3D tilt
+    const idleFloatX = this.reducedMotion ? 0 : Math.sin(elapsed * 0.0007) * 6;
+    const idleFloatY = this.reducedMotion ? 0 : Math.cos(elapsed * 0.00055) * 4;
+    const panX = -this.currentPointerX * 22 + idleFloatX;
+    const panY = -this.currentPointerY * 15 + idleFloatY;
 
     let inConnector = false;
 
     if (isLastScene || this.reducedMotion) {
-      // Final scene steady dive (or reduced-motion static framing)
-      const diveT = this.reducedMotion ? 0.2 : easeInOutSine(local);
+      const diveT = this.reducedMotion ? 0.18 : easeInOutSine(local);
       const scale = START_SCALE + diveT * (DIVE_END_SCALE - START_SCALE);
-      this.drawSceneLayer(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, local);
+      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, local);
     } else if (local <= DIVE_SPLIT) {
-      // Phase 1: Camera Dive-In into current scene
       const diveNorm = local / DIVE_SPLIT;
       const eased = easeInOutSine(diveNorm);
       const scale = START_SCALE + eased * (DIVE_END_SCALE - START_SCALE);
-      this.drawSceneLayer(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, diveNorm);
+      this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, `dive-${sceneIdx}`, diveNorm);
     } else {
-      // Phase 2: Seamless Portal Connector (Seam-matched fly-through into Scene i+1)
+      // Seamless Multi-Plane Portal Connector (Seam-Rule locked)
       inConnector = true;
       const connNorm = (local - DIVE_SPLIT) / (1 - DIVE_SPLIT);
       const eased = easeInOutCubic(connNorm);
 
-      // Next scene emerges from focal depth and lands EXACTLY at START_SCALE (1.03x)
+      // Emerging destination world (lands pixel-exact at START_SCALE = 1.04)
       const nextScale = PORTAL_IN_START_SCALE + eased * (START_SCALE - PORTAL_IN_START_SCALE);
-      this.drawSceneLayer(sceneIdx + 1, nextScale, panX * 0.6, panY * 0.6, 1);
+      this.drawMultiPlaneScene(sceneIdx + 1, nextScale, panX * 0.6, panY * 0.6, 1);
 
-      // Current scene accelerates past lens while dissolving smoothly
+      // Outgoing world rushing past camera lens
       const outScale = DIVE_END_SCALE + eased * (PORTAL_OUT_SCALE - DIVE_END_SCALE);
-      this.drawSceneLayer(
+      this.drawMultiPlaneScene(
         sceneIdx,
         outScale,
-        panX * 1.35,
-        panY * 1.35,
+        panX * 1.4,
+        panY * 1.4,
         1 - eased,
         `conn-${sceneIdx}`,
         connNorm
       );
     }
 
-    this.drawArchitecturalReticle(this.currentProgress, inConnector);
+    this.draw3DCADAndParticles(elapsed, inConnector);
   }
 
-  private syncHUD(): void {
+  private syncDOM(elapsed: number): void {
     const total = this.scenes.length;
     const timeline = clamp(this.currentProgress * total, 0, total - 0.0001);
     const activeIdx = Math.floor(timeline);
     const local = timeline - activeIdx;
     const isLast = activeIdx >= total - 1;
 
-    // Progress bar & 360° telemetry
+    // Current scene scale for 3D hotspot projection
+    const diveNorm = clamp(local / DIVE_SPLIT, 0, 1);
+    const activeScale =
+      START_SCALE + easeInOutSine(diveNorm) * (DIVE_END_SCALE - START_SCALE);
+
+    // 1. Beat 00 (Hero) Diagonal Shutter & Copy Portal Choreography
+    const heroTimeline = clamp(timeline, 0, 1); // 0..1 across Beat 00
+    if (this.heroShutterEl) {
+      if (this.reducedMotion) {
+        this.heroShutterEl.style.opacity = activeIdx === 0 ? '1' : '0';
+      } else {
+        const shutterExit = clamp((heroTimeline - 0.14) / 0.68, 0, 1);
+        const easedShutter = easeInOutCubic(shutterExit);
+        this.heroShutterEl.style.opacity = (1 - easedShutter).toFixed(3);
+        this.heroShutterEl.style.transform = `translate3d(${(-easedShutter * 62).toFixed(1)}%, 0, 0) skewX(${(-easedShutter * 7).toFixed(2)}deg)`;
+      }
+    }
+
+    if (this.heroCopyEl) {
+      if (this.reducedMotion) {
+        const showHero = activeIdx === 0;
+        this.heroCopyEl.style.opacity = showHero ? '1' : '0';
+        this.heroCopyEl.style.pointerEvents = showHero ? 'auto' : 'none';
+      } else {
+        const copyExit = clamp((heroTimeline - 0.06) / 0.58, 0, 1);
+        const easedCopy = easeInOutSine(copyExit);
+        const alpha = 1 - easedCopy;
+        const scale = 1 + easedCopy * 0.09;
+        const shiftX = -easedCopy * 44;
+        const shiftY = -easedCopy * 24;
+        this.heroCopyEl.style.opacity = alpha.toFixed(3);
+        this.heroCopyEl.style.transform = `translate3d(${shiftX.toFixed(1)}px, ${shiftY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
+        this.heroCopyEl.style.filter =
+          easedCopy > 0.05 ? `blur(${(easedCopy * 7).toFixed(1)}px)` : 'none';
+        this.heroCopyEl.style.pointerEvents = alpha > 0.45 ? 'auto' : 'none';
+        this.heroCopyEl.setAttribute('aria-hidden', alpha > 0.2 ? 'false' : 'true');
+      }
+    }
+
+    // 2. Top Telemetry HUD (subtle during Hero top, full visibility once diving)
+    if (this.hudTopEl) {
+      const hudAlpha = clamp((timeline - 0.35) / 0.4, 0, 1);
+      this.hudTopEl.style.opacity = this.reducedMotion ? '1' : hudAlpha.toFixed(3);
+      this.hudTopEl.style.transform = this.reducedMotion
+        ? 'none'
+        : `translate3d(0, ${((1 - hudAlpha) * -14).toFixed(1)}px, 0)`;
+      this.hudTopEl.style.pointerEvents = hudAlpha > 0.5 ? 'auto' : 'none';
+    }
+
+    // 3. Progress bar & 360° telemetry
     if (this.progressFillEl) {
       this.progressFillEl.style.transform = `scaleX(${this.currentProgress.toFixed(4)})`;
     }
@@ -463,28 +672,30 @@ export class ScrollWorldEngine {
     }
 
     if (this.sceneCounterEl) {
-      this.sceneCounterEl.textContent = `0${activeIdx + 1} / 0${total}`;
+      const displayIdx = Math.max(1, activeIdx);
+      this.sceneCounterEl.textContent = `0${displayIdx} / 0${total - 1}`;
     }
 
     if (this.phaseBadgeEl) {
       const inTransition = !isLast && local > DIVE_SPLIT;
       this.phaseBadgeEl.textContent = inTransition
-        ? 'TRANSICIÓN DE ESCENA · VUELO CONTINUO'
-        : 'EXPLORACIÓN DE ESPECIALIDAD · 360° PRO';
+        ? 'PORTAL 3D · VUELO ENTRE ESCENAS'
+        : 'DIORAMA MULTI-PLANO · 360° PRO';
     }
 
-    // Chapter nav buttons
+    // 4. Chapter rail buttons (00 Inicio .. 06 Suministros)
     this.chapterBtns.forEach((btn, idx) => {
       btn.classList.toggle('is-active', idx === activeIdx);
       btn.setAttribute('aria-current', idx === activeIdx ? 'step' : 'false');
     });
 
-    // Beat Overlay Cards choreographed to camera depth
-    this.beatEls.forEach((el, idx) => {
-      if (idx !== activeIdx) {
+    // 5. Service Beat Cards (Scenes 1..6 => beatEls[0..5])
+    this.beatEls.forEach((el, beatIdx) => {
+      const sceneForBeat = beatIdx + 1; // Scene 0 is Hero
+      if (sceneForBeat !== activeIdx) {
         el.style.opacity = '0';
         el.style.pointerEvents = 'none';
-        el.style.transform = 'translate3d(0, 26px, 0) scale(0.96)';
+        el.style.transform = 'translate3d(0, 28px, 0) scale(0.96)';
         el.setAttribute('aria-hidden', 'true');
         return;
       }
@@ -494,16 +705,16 @@ export class ScrollWorldEngine {
       let scale = 1;
 
       if (!this.reducedMotion) {
-        if (local < 0.12) {
-          const enterT = easeInOutSine(local / 0.12);
+        if (local < 0.13) {
+          const enterT = easeInOutSine(local / 0.13);
           alpha = enterT;
-          yOffset = (1 - enterT) * 24;
-          scale = 0.97 + enterT * 0.03;
+          yOffset = (1 - enterT) * 26;
+          scale = 0.96 + enterT * 0.04;
         } else if (!isLast && local > DIVE_SPLIT - 0.04) {
           const exitT = clamp((local - (DIVE_SPLIT - 0.04)) / 0.24, 0, 1);
           alpha = 1 - exitT;
-          yOffset = -exitT * 28;
-          scale = 1 + exitT * 0.04;
+          yOffset = -exitT * 30;
+          scale = 1 + exitT * 0.045;
         }
       }
 
@@ -512,6 +723,49 @@ export class ScrollWorldEngine {
       el.style.pointerEvents = alpha > 0.45 ? 'auto' : 'none';
       el.setAttribute('aria-hidden', alpha > 0.2 ? 'false' : 'true');
     });
+
+    // 6. 3D-Tracked Technical Hotspots (Groups 0..6)
+    const idleFloatX = this.reducedMotion ? 0 : Math.sin(elapsed * 0.0007) * 6;
+    const idleFloatY = this.reducedMotion ? 0 : Math.cos(elapsed * 0.00055) * 4;
+    const basePanX = -this.currentPointerX * 22 + idleFloatX;
+    const basePanY = -this.currentPointerY * 15 + idleFloatY;
+
+    this.hotspotGroups.forEach((group, groupIdx) => {
+      if (groupIdx !== activeIdx) {
+        group.style.opacity = '0';
+        group.classList.remove('is-active');
+        return;
+      }
+
+      // Visibility window during active dive
+      let groupAlpha = 1;
+      if (!this.reducedMotion) {
+        if (groupIdx > 0 && local < 0.14) {
+          groupAlpha = easeInOutSine(local / 0.14);
+        } else if (!isLast && local > DIVE_SPLIT - 0.06) {
+          groupAlpha = 1 - clamp((local - (DIVE_SPLIT - 0.06)) / 0.2, 0, 1);
+        }
+      }
+
+      group.style.opacity = groupAlpha.toFixed(3);
+      group.classList.toggle('is-active', groupAlpha > 0.35);
+
+      // Apply 3D camera projection per individual hotspot pin
+      const pins = group.querySelectorAll<HTMLElement>('[data-sw-hotspot]');
+      pins.forEach((pin) => {
+        const hx = parseFloat(pin.dataset.hx || '50') / 100;
+        const hy = parseFloat(pin.dataset.hy || '50') / 100;
+        const depth = parseFloat(pin.dataset.depth || '1.2');
+
+        const zoomSpreadX = (activeScale - START_SCALE) * (hx - 0.5) * this.logicalWidth * 0.65;
+        const zoomSpreadY = (activeScale - START_SCALE) * (hy - 0.5) * this.logicalHeight * 0.65;
+        const dx = basePanX * depth + zoomSpreadX;
+        const dy = basePanY * depth + zoomSpreadY;
+
+        pin.style.transform = this.reducedMotion
+          ? 'none'
+          : `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0)`;
+      });
+    });
   }
 }
-

@@ -13,6 +13,20 @@ export interface ServiceItem {
   imageAlt: string;
 }
 
+export interface DioramaHotspot {
+  code: string;
+  label: string;
+  detail: string;
+  /** Coordenada porcentual horizontal en el diorama (0-100) */
+  x: number;
+  /** Coordenada porcentual vertical en el diorama (0-100) */
+  y: number;
+  /** Dirección hacia donde se despliega la línea conectora CAD */
+  direction: 'left' | 'right';
+  /** Factor de profundidad Z para paralaje diferencial (1 = plano medio, >1 = primer plano) */
+  depth: number;
+}
+
 export interface ScrollWorldScene {
   id: string;
   beatNumber: string;
@@ -30,6 +44,7 @@ export interface ScrollWorldScene {
   connectorVideo?: string;
   serviceValue: string;
   hudPosition: 'left' | 'right';
+  hotspots: DioramaHotspot[];
 }
 
 export interface ValueItem {
@@ -53,6 +68,43 @@ export const navLinks = [
   { label: 'Contacto', href: '#contacto' },
 ];
 
+export const heroDioramaConfig = {
+  id: 'beat-hero',
+  beatNumber: '00',
+  chapterLabel: 'Inicio',
+  stillImage: '/images/hero-main-1920.webp',
+  fallbackStill: '/images/hero-main.jpg',
+  hotspots: [
+    {
+      code: 'EST-360',
+      label: 'Ingeniería & Arquitectura',
+      detail: 'Diseño estructural · NSR-10',
+      x: 74,
+      y: 30,
+      direction: 'left',
+      depth: 1.15,
+    },
+    {
+      code: 'B2B-B2G',
+      label: 'Contratación Pública y Privada',
+      detail: 'Ejecución integral multi-sector',
+      x: 66,
+      y: 55,
+      direction: 'right',
+      depth: 1.32,
+    },
+    {
+      code: 'EXP-25+',
+      label: '+25 Años de Respaldo',
+      detail: 'Villavicencio · Cobertura Nacional',
+      x: 78,
+      y: 74,
+      direction: 'left',
+      depth: 1.48,
+    },
+  ] as DioramaHotspot[],
+};
+
 export const scrollWorldScenes: ScrollWorldScene[] = [
   {
     id: 'beat-arquitectura',
@@ -69,6 +121,26 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     fallbackStill: '/images/scene-01-arquitectura.jpg',
     serviceValue: 'Arquitectura e Ingeniería Civil',
     hudPosition: 'left',
+    hotspots: [
+      {
+        code: 'CAD-01',
+        label: 'Planimetría Ejecutiva',
+        detail: 'Modelado BIM & detalle constructivo',
+        x: 63,
+        y: 62,
+        direction: 'right',
+        depth: 1.28,
+      },
+      {
+        code: 'URB-02',
+        label: 'Estudios y Diseños',
+        detail: 'Viabilidad técnica y urbanismo',
+        x: 74,
+        y: 34,
+        direction: 'left',
+        depth: 1.12,
+      },
+    ],
   },
   {
     id: 'beat-construccion',
@@ -85,6 +157,26 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     fallbackStill: '/images/scene-02-construccion.jpg',
     serviceValue: 'Construcción y Obras Civiles',
     hudPosition: 'right',
+    hotspots: [
+      {
+        code: 'CIM-01',
+        label: 'Placa y Armadura Estructural',
+        detail: 'Acero figurado y postensado',
+        x: 32,
+        y: 38,
+        direction: 'right',
+        depth: 1.16,
+      },
+      {
+        code: 'SST-02',
+        label: 'Supervisión Residente en Obra',
+        detail: 'Control de calidad y cronograma',
+        x: 41,
+        y: 68,
+        direction: 'left',
+        depth: 1.36,
+      },
+    ],
   },
   {
     id: 'beat-mantenimiento',
@@ -101,6 +193,26 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     fallbackStill: '/images/scene-03-mantenimiento.jpg',
     serviceValue: 'Mantenimiento, Reparaciones y Adecuaciones',
     hudPosition: 'left',
+    hotspots: [
+      {
+        code: 'RET-01',
+        label: 'Redes Eléctricas RETIE',
+        detail: 'Diagnóstico e intervención certificada',
+        x: 62,
+        y: 44,
+        direction: 'right',
+        depth: 1.3,
+      },
+      {
+        code: 'LOC-02',
+        label: 'Adecuaciones Locativas',
+        detail: 'Drywall, pintura e impermeabilización',
+        x: 73,
+        y: 70,
+        direction: 'left',
+        depth: 1.15,
+      },
+    ],
   },
   {
     id: 'beat-publicidad',
@@ -117,6 +229,26 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     fallbackStill: '/images/scene-04-publicidad.jpg',
     serviceValue: 'Publicidad, Diseño Gráfico y Artes Gráficas',
     hudPosition: 'right',
+    hotspots: [
+      {
+        code: 'CMYK-01',
+        label: 'Fidelidad Cromática Pantone',
+        detail: 'Producción gráfica industrial',
+        x: 34,
+        y: 36,
+        direction: 'right',
+        depth: 1.2,
+      },
+      {
+        code: 'SEN-02',
+        label: 'Señalización & Branding',
+        detail: 'Avisos corporativos y normativa',
+        x: 42,
+        y: 68,
+        direction: 'left',
+        depth: 1.34,
+      },
+    ],
   },
   {
     id: 'beat-ambiental',
@@ -133,6 +265,26 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     fallbackStill: '/images/scene-05-ambiental.jpg',
     serviceValue: 'Consultoría y Gestión Ambiental',
     hudPosition: 'left',
+    hotspots: [
+      {
+        code: 'HID-01',
+        label: 'Manejo de Cuencas Hídricas',
+        detail: 'Monitoreo y estudios ambientales',
+        x: 61,
+        y: 38,
+        direction: 'right',
+        depth: 1.18,
+      },
+      {
+        code: 'BIO-02',
+        label: 'Restauración de Ecosistemas',
+        detail: 'Conservación y sostenibilidad regional',
+        x: 74,
+        y: 66,
+        direction: 'left',
+        depth: 1.32,
+      },
+    ],
   },
   {
     id: 'beat-suministros',
@@ -143,12 +295,32 @@ export const scrollWorldScenes: ScrollWorldScene[] = [
     highlight: 'Logística Operativa',
     description:
       'Abastecimiento oportuno de tecnología, herramientas especializadas, dotaciones industriales e insumos estratégicos para contratos y operaciones.',
-    metrics: ' Dotación · Equipos · Abastecimiento B2B/B2G',
+    metrics: 'Dotación · Equipos · Abastecimiento B2B/B2G',
     tags: ['Equipos tecnológicos', 'Herramientas', 'Dotaciones', 'Abastecimiento'],
     stillImage: '/images/scene-06-suministros-1920.webp',
     fallbackStill: '/images/scene-06-suministros.jpg',
     serviceValue: 'Suministros y Logística Operativa',
     hudPosition: 'right',
+    hotspots: [
+      {
+        code: 'INV-01',
+        label: 'Equipamiento & Dotaciones',
+        detail: 'Tecnología, herramientas e insumos',
+        x: 36,
+        y: 40,
+        direction: 'right',
+        depth: 1.16,
+      },
+      {
+        code: 'LOG-02',
+        label: 'Despacho y Cadena Operativa',
+        detail: 'Cumplimiento en contratos B2B y B2G',
+        x: 28,
+        y: 68,
+        direction: 'right',
+        depth: 1.38,
+      },
+    ],
   },
 ];
 
