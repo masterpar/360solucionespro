@@ -59,7 +59,10 @@ export class ScrollWorldEngine {
   private scenes: EngineSceneConfig[];
   private images: (HTMLImageElement | null)[] = [];
   private videoMap: Map<string, HTMLVideoElement> = new Map();
+  private pendingSeekMap: Map<string, number> = new Map();
+  private lastQuantizedFrameMap: Map<string, number> = new Map();
   private introVideoEl: HTMLVideoElement | null = null;
+  private videoPoolEl: HTMLElement | null = null;
 
   private heroCopyEl: HTMLElement | null;
   private heroShutterEl: HTMLElement | null;
@@ -197,23 +200,49 @@ export class ScrollWorldEngine {
     });
   }
 
+  private ensureVideoPool(): HTMLElement {
+    if (this.videoPoolEl) return this.videoPoolEl;
+    const pool = document.createElement('div');
+    pool.setAttribute('aria-hidden', 'true');
+    pool.style.cssText =
+      'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0.001;pointer-events:none;overflow:hidden;z-index:-1;';
+    this.trackEl.appendChild(pool);
+    this.videoPoolEl = pool;
+    return pool;
+  }
+
+  private configureVideoElement(video: HTMLVideoElement): void {
+    video.defaultMuted = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.setAttribute('muted', '');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.setAttribute('preload', 'auto');
+    if ('disablePictureInPicture' in video) {
+      video.disablePictureInPicture = true;
+    }
+    this.ensureVideoPool().appendChild(video);
+  }
+
+  private tryPlayIntroVideo(): void {
+    const video = this.introVideoEl;
+    if (!video || this.reducedMotion || !this.isVisible || this.currentProgress >= 0.04) return;
+    if (video.paused) {
+      void video.play().catch(() => {});
+    }
+  }
+
   private preloadIntroLoopVideo(url: string): void {
     const video = document.createElement('video');
-    video.muted = true;
+    this.configureVideoElement(video);
     video.loop = true;
-    video.playsInline = true;
+    video.setAttribute('loop', '');
     video.autoplay = !this.reducedMotion;
-    video.preload = 'auto';
     video.src = url;
-    video.addEventListener(
-      'canplay',
-      () => {
-        if (!this.reducedMotion && this.isVisible && this.currentProgress < 0.06) {
-          void video.play().catch(() => {});
-        }
-      },
-      { once: true }
-    );
+    const onReady = () => this.tryPlayIntroVideo();
+    video.addEventListener('loadeddata', onReady, { once: true });
+    video.addEventListener('canplay', onReady, { once: true });
     video.load();
     this.introVideoEl = video;
   }
@@ -238,10 +267,32 @@ export class ScrollWorldEngine {
       const blob = await response.blob();
       const objectUrl = URL.createObjectURL(blob);
       const video = document.createElement('video');
-      video.muted = true;
-      video.playsInline = true;
-      video.preload = 'auto';
+      this.configureVideoElement(video);
       video.src = objectUrl;
+
+      // Prime first frame on mobile/desktop decoders and flush queued seeks smoothly
+      video.addEventListener(
+        'loadedmetadata',
+        () => {
+          try {
+            video.currentTime = 0.001;
+          } catch {
+            // Ignore initial seek error if not yet ready
+          }
+        },
+        { once: true }
+      );
+
+      video.addEventListener('seeked', () => {
+        const pending = this.pendingSeekMap.get(key);
+        if (pending !== undefined) {
+          this.pendingSeekMap.delete(key);
+          if (Math.abs(video.currentTime - pending) > 0.015) {
+            video.currentTime = pending;
+          }
+        }
+      });
+
       video.load();
       this.videoMap.set(key, video);
     } catch {
@@ -250,10 +301,25 @@ export class ScrollWorldEngine {
   }
 
   private bindEvents(): void {
-    window.addEventListener('scroll', () => this.updateTargetScroll(), { passive: true });
+    window.addEventListener(
+      'scroll',
+      () => {
+        this.updateTargetScroll();
+        this.tryPlayIntroVideo();
+      },
+      { passive: true }
+    );
     window.addEventListener('resize', () => {
       this.handleResize();
       this.updateTargetScroll();
+    });
+
+    // Mobile iOS/Android autoplay unlock on first touch or interaction
+    const unlockIntro = () => this.tryPlayIntroVideo();
+    window.addEventListener('touchstart', unlockIntro, { passive: true, once: true });
+    window.addEventListener('pointerdown', unlockIntro, { passive: true, once: true });
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) this.tryPlayIntroVideo();
     });
 
     window.addEventListener(
@@ -314,10 +380,10 @@ export class ScrollWorldEngine {
   private startLoop(): void {
     const tick = (now: number) => {
       if (this.isVisible) {
-        const lerpFactor = this.reducedMotion ? 1 : 0.1;
+        const lerpFactor = this.reducedMotion ? 1 : 0.13;
         this.prevProgress = this.currentProgress;
         this.currentProgress += (this.targetProgress - this.currentProgress) * lerpFactor;
-        if (Math.abs(this.targetProgress - this.currentProgress) < 0.00008) {
+        if (Math.abs(this.targetProgress - this.currentProgress) < 0.00006) {
           this.currentProgress = this.targetProgress;
         }
 
@@ -349,11 +415,18 @@ export class ScrollWorldEngine {
     const h = this.logicalHeight;
     if (w <= 0 || h <= 0 || srcW <= 0 || srcH <= 0) return;
 
+    const isMobilePortrait = w < 768 && h > w;
+    const effectiveScale = isMobilePortrait ? Math.min(scale, 1.04) : scale;
     const baseRatio = Math.max(w / srcW, h / srcH);
-    const drawW = srcW * baseRatio * scale;
-    const drawH = srcH * baseRatio * scale;
-    const x = (w - drawW) * 0.5 + offsetX;
-    const y = (h - drawH) * 0.5 + offsetY;
+    const drawW = srcW * baseRatio * effectiveScale;
+    const drawH = srcH * baseRatio * effectiveScale;
+
+    // On portrait mobile screens, anchor slightly higher so the skyscraper towers
+    // fill the upper showcase window above the Hero copy instead of empty sky.
+    const xAnchor = isMobilePortrait ? 0.48 : 0.5;
+    const yAnchor = isMobilePortrait ? 0.22 : 0.5;
+    const x = (w - drawW) * xAnchor + offsetX * (isMobilePortrait ? 0.35 : 1);
+    const y = (h - drawH) * yAnchor + offsetY * (isMobilePortrait ? 0.35 : 1);
 
     this.ctx.save();
     this.ctx.globalAlpha = clamp(alpha, 0, 1);
@@ -401,10 +474,22 @@ export class ScrollWorldEngine {
     if (videoKey && videoNormTime !== undefined) {
       const video = this.videoMap.get(videoKey);
       if (video && video.readyState >= 2 && video.duration > 0) {
-        const targetTime = clamp(videoNormTime, 0, 0.996) * video.duration;
-        if (!video.seeking && Math.abs(video.currentTime - targetTime) > 0.016) {
-          video.currentTime = targetTime;
+        const fps = 24;
+        const rawTime = clamp(videoNormTime, 0, 0.996) * video.duration;
+        const targetFrame = Math.round(rawTime * fps);
+        const quantizedTime = clamp(targetFrame / fps, 0.001, Math.max(0.001, video.duration - 0.02));
+        const prevFrame = this.lastQuantizedFrameMap.get(videoKey);
+
+        if (prevFrame !== targetFrame) {
+          this.lastQuantizedFrameMap.set(videoKey, targetFrame);
+          if (!video.seeking) {
+            this.pendingSeekMap.delete(videoKey);
+            video.currentTime = quantizedTime;
+          } else {
+            this.pendingSeekMap.set(videoKey, quantizedTime);
+          }
         }
+
         this.drawCoverSource(
           video,
           video.videoWidth || 1920,
@@ -429,86 +514,74 @@ export class ScrollWorldEngine {
   }
 
   /**
-   * Renders 3D CAD perspective tunnel lines, vanishing crosshairs,
-   * and volumetric Z-space particles that fly past the camera!
+   * Renders subtle depth vignette and volumetric Z-space particles without
+   * harsh wireframe flashes or horizontal scanlines over the video.
    */
-  private draw3DCADAndParticles(elapsed: number, isConnector: boolean): void {
+  private draw3DCADAndParticles(
+    elapsed: number,
+    connectorIntensity: number,
+    timeline: number,
+    hasActiveVideo: boolean
+  ): void {
     const w = this.logicalWidth;
     const h = this.logicalHeight;
+    const isMobile = w < 768;
     const cx = w * 0.5 - this.currentPointerX * 22;
     const cy = h * 0.5 - this.currentPointerY * 15;
 
     this.ctx.save();
 
-    // 1. Executive depth vignette for contrast
+    // 1. Soft executive vignette (kept extra light during Hero & on mobile so the video shines)
+    const heroLightness = clamp(1 - timeline / 0.85, 0, 1);
+    const midAlpha = isMobile
+      ? 0.14 - heroLightness * 0.08
+      : 0.32 - heroLightness * 0.16;
+    const edgeAlpha = isMobile
+      ? 0.52 - heroLightness * 0.16
+      : 0.72 - heroLightness * 0.2;
+
     const vignette = this.ctx.createRadialGradient(
       cx,
       cy,
-      Math.min(w, h) * 0.18,
+      Math.min(w, h) * 0.24,
       w * 0.5,
       h * 0.5,
-      Math.max(w, h) * 0.78
+      Math.max(w, h) * 0.82
     );
-    vignette.addColorStop(0, 'rgba(10, 34, 57, 0.08)');
-    vignette.addColorStop(0.62, 'rgba(10, 34, 57, 0.44)');
-    vignette.addColorStop(1, 'rgba(6, 21, 36, 0.84)');
+    vignette.addColorStop(0, 'rgba(10, 34, 57, 0.02)');
+    vignette.addColorStop(0.65, `rgba(10, 34, 57, ${midAlpha.toFixed(3)})`);
+    vignette.addColorStop(1, `rgba(6, 21, 36, ${edgeAlpha.toFixed(3)})`);
     this.ctx.fillStyle = vignette;
     this.ctx.fillRect(0, 0, w, h);
 
-    // 2. 3D CAD Perspective Corridor Rings receding in Z-space
+    // 2. Subtle 3D perspective rings & particles (suppressed over active video to prevent visual cuts)
     if (!this.reducedMotion) {
-      const zFlow = (this.currentProgress * this.scenes.length * 1.5 + elapsed * 0.00008) % 1;
+      if (!hasActiveVideo) {
+        const zFlow = (this.currentProgress * this.scenes.length * 1.5 + elapsed * 0.00008) % 1;
+        const baseRingAlpha = 0.05 + connectorIntensity * 0.09;
 
-      // Vanishing diagonal rays
-      this.ctx.strokeStyle = isConnector
-        ? 'rgba(255, 107, 0, 0.14)'
-        : 'rgba(255, 255, 255, 0.06)';
-      this.ctx.lineWidth = 1;
-      const corners = [
-        [0, 0],
-        [w, 0],
-        [w, h],
-        [0, h],
-      ];
-      this.ctx.beginPath();
-      for (const [qx, qy] of corners) {
-        const dx = qx - cx;
-        const dy = qy - cy;
-        this.ctx.moveTo(cx + dx * 0.16, cy + dy * 0.16);
-        this.ctx.lineTo(qx, qy);
+        for (let r = 0; r < 3; r++) {
+          const depthPhase = (zFlow + r / 3) % 1;
+          const perspectiveScale = Math.pow(depthPhase, 2.1);
+          const rw = w * (0.14 + perspectiveScale * 0.92);
+          const rh = h * (0.14 + perspectiveScale * 0.92);
+          const rx = cx - rw * 0.5;
+          const ry = cy - rh * 0.5;
+          const frameAlpha = Math.sin(depthPhase * Math.PI) * baseRingAlpha;
+
+          this.ctx.strokeStyle =
+            r === 0 && connectorIntensity > 0.3
+              ? `rgba(255, 107, 0, ${frameAlpha.toFixed(3)})`
+              : `rgba(255, 255, 255, ${frameAlpha.toFixed(3)})`;
+          this.ctx.strokeRect(rx, ry, rw, rh);
+        }
       }
-      this.ctx.stroke();
-
-      // 3 perspective depth frames expanding toward viewer
-      for (let r = 0; r < 3; r++) {
-        const depthPhase = (zFlow + r / 3) % 1;
-        const perspectiveScale = Math.pow(depthPhase, 2.1); // True 1/Z perspective acceleration
-        const rw = w * (0.14 + perspectiveScale * 0.92);
-        const rh = h * (0.14 + perspectiveScale * 0.92);
-        const rx = cx - rw * 0.5;
-        const ry = cy - rh * 0.5;
-        const frameAlpha = Math.sin(depthPhase * Math.PI) * (isConnector ? 0.22 : 0.09);
-
-        this.ctx.strokeStyle =
-          r === 0 && isConnector
-            ? `rgba(255, 107, 0, ${frameAlpha.toFixed(3)})`
-            : `rgba(255, 255, 255, ${frameAlpha.toFixed(3)})`;
-        this.ctx.strokeRect(rx, ry, rw, rh);
-      }
-
-      // Subtle CAD laser scanline during Hero / active inspection
-      const scanY = ((elapsed * 0.045) % (h + 120)) - 60;
-      const scanGrad = this.ctx.createLinearGradient(0, scanY - 24, 0, scanY + 24);
-      scanGrad.addColorStop(0, 'rgba(255, 107, 0, 0)');
-      scanGrad.addColorStop(0.5, 'rgba(255, 107, 0, 0.09)');
-      scanGrad.addColorStop(1, 'rgba(255, 107, 0, 0)');
-      this.ctx.fillStyle = scanGrad;
-      this.ctx.fillRect(0, scanY - 24, w, 48);
 
       // 3. Volumetric 3D Z-Space Particles
       const speedBoost = this.scrollVelocity * 0.085;
       const baseDrift = 0.0014;
       const spread = Math.max(w, h) * 0.62;
+      const particleOpacityScale = hasActiveVideo ? 0.55 : 0.9;
 
       for (const p of this.particles) {
         p.z -= baseDrift + speedBoost;
@@ -526,20 +599,19 @@ export class ScrollWorldEngine {
 
         if (sx < -20 || sx > w + 20 || sy < -20 || sy > h + 20) continue;
 
-        const proximityAlpha = clamp((1 - p.z) * 0.65, 0.05, 0.58);
-        const radius = clamp(p.size * invZ * 0.42, 0.8, 3.8);
+        const proximityAlpha = clamp((1 - p.z) * 0.55 * particleOpacityScale, 0.03, 0.42);
+        const radius = clamp(p.size * invZ * 0.38, 0.7, 3.2);
 
         this.ctx.fillStyle = p.isAccent
           ? `rgba(255, 107, 0, ${proximityAlpha.toFixed(3)})`
           : `rgba(248, 250, 252, ${(proximityAlpha * 0.75).toFixed(3)})`;
 
-        // Radial streak when scrolling rapidly through portals
-        if (Math.abs(speedBoost) > 0.006) {
-          const prevInvZ = 1 / clamp(p.z + speedBoost * 2.2, 0.1, 1.2);
+        if (Math.abs(speedBoost) > 0.008) {
+          const prevInvZ = 1 / clamp(p.z + speedBoost * 2.0, 0.1, 1.2);
           const px = cx + p.x * prevInvZ * spread * 0.45;
           const py = cy + p.y * prevInvZ * spread * 0.45;
           this.ctx.strokeStyle = this.ctx.fillStyle;
-          this.ctx.lineWidth = radius * 0.85;
+          this.ctx.lineWidth = radius * 0.8;
           this.ctx.beginPath();
           this.ctx.moveTo(px, py);
           this.ctx.lineTo(sx, sy);
@@ -557,8 +629,8 @@ export class ScrollWorldEngine {
 
   /**
    * Blends the live-playing Hero Intro Video (`hero-intro.mp4`) seamlessly into
-   * the scroll-scrubbed `scroll-world` Z-flight as soon as the user starts scrolling.
-   * Includes a live orbital cinematic motion layer when `hero-intro.mp4` is not yet generated.
+   * Frame 0 of `dive-00.mp4` at the exact same scale (1.03) and pan (0.35x) so
+   * there is zero double-image ghosting or jump cut when scrolling begins.
    */
   private renderHeroIntroBlend(
     elapsed: number,
@@ -566,9 +638,12 @@ export class ScrollWorldEngine {
     panX: number,
     panY: number
   ): void {
+    const hasDive0 = this.hasReadyVideo('dive-0');
+    // When dive-00.mp4 is active, crossfade quickly at the very top (0..0.055) while dive-00 is still at Frame 0
+    const fadeWindow = hasDive0 ? 0.055 : 0.28;
     const introBlend = this.reducedMotion
       ? 0
-      : 1 - easeInOutCubic(clamp((timeline - 0.015) / 0.3, 0, 1));
+      : 1 - easeInOutSine(clamp((timeline - 0.002) / fadeWindow, 0, 1));
 
     const introVideo = this.introVideoEl;
     const introReady = Boolean(introVideo && introVideo.readyState >= 2);
@@ -585,54 +660,33 @@ export class ScrollWorldEngine {
 
     if (introBlend <= 0.005) return;
 
-    // Forward Z-acceleration as the live intro dissolves into scroll-world
-    const pushIntoWorld = (1 - introBlend) * 0.16;
-
     if (introReady && introVideo) {
+      // Exact same scale (1.03) and pan (0.35x) as dive-00.mp4 Frame 0 for a 100% invisible handoff
       this.drawCoverSource(
         introVideo,
         introVideo.videoWidth || 1920,
         introVideo.videoHeight || 1080,
-        1.03 + pushIntoWorld,
-        panX * 0.45,
-        panY * 0.45,
+        1.03,
+        panX * 0.35,
+        panY * 0.35,
         introBlend
       );
       return;
     }
 
-    // Live orbital drone + golden glass shimmer fallback before hero-intro.mp4 is generated
+    // Fallback when hero-intro.mp4 is still loading
     const heroImg = this.images[0];
     if (heroImg && heroImg.complete && heroImg.naturalWidth > 0) {
-      const orbitScale = 1.065 + Math.sin(elapsed * 0.00068) * 0.032 + pushIntoWorld;
-      const orbitX = Math.sin(elapsed * 0.00052) * 26 + panX;
-      const orbitY = Math.cos(elapsed * 0.00041) * 14 + panY;
-
+      const orbitScale = 1.03 + Math.sin(elapsed * 0.00068) * 0.018;
       this.drawCoverSource(
         heroImg,
         heroImg.naturalWidth,
         heroImg.naturalHeight,
         orbitScale,
-        orbitX,
-        orbitY,
+        panX * 0.35,
+        panY * 0.35,
         introBlend
       );
-
-      // Animated dusk architectural light sweep across the facade
-      const w = this.logicalWidth;
-      const h = this.logicalHeight;
-      const sweepPhase = (elapsed * 0.00014) % 1;
-      const beamX = w * (-0.25 + sweepPhase * 1.5);
-      this.ctx.save();
-      this.ctx.globalAlpha = introBlend * 0.22;
-      this.ctx.globalCompositeOperation = 'screen';
-      const beamGrad = this.ctx.createLinearGradient(beamX - w * 0.22, 0, beamX + w * 0.22, h);
-      beamGrad.addColorStop(0, 'rgba(255, 107, 0, 0)');
-      beamGrad.addColorStop(0.5, 'rgba(255, 168, 92, 0.55)');
-      beamGrad.addColorStop(1, 'rgba(56, 189, 248, 0)');
-      this.ctx.fillStyle = beamGrad;
-      this.ctx.fillRect(0, 0, w, h);
-      this.ctx.restore();
     }
   }
 
@@ -656,27 +710,31 @@ export class ScrollWorldEngine {
     const panX = -this.currentPointerX * 22 + idleFloatX;
     const panY = -this.currentPointerY * 15 + idleFloatY;
 
-    let inConnector = false;
+    let connectorIntensity = 0;
     const diveKey = `dive-${sceneIdx}`;
     const connKey = `conn-${sceneIdx}`;
     const hasDiveVid = this.hasReadyVideo(diveKey);
     const hasConnVid = this.hasReadyVideo(connKey);
+    const hasNextDiveVid = this.hasReadyVideo(`dive-${sceneIdx + 1}`);
+    const hasActiveVideo = hasDiveVid || hasConnVid || (sceneIdx === 0 && Boolean(this.introVideoEl));
 
     if (isLastScene || this.reducedMotion) {
       const diveT = this.reducedMotion ? 0.18 : easeInOutSine(local);
       const scale = START_SCALE + diveT * (DIVE_END_SCALE - START_SCALE);
       this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, diveKey, local);
     } else if (hasDiveVid && !hasConnVid) {
-      // Direct Google Flow Frames-to-Video clip (Scene i -> Scene i+1 in a single MP4)
-      let videoT: number;
-      if (local <= DIVE_SPLIT) {
-        videoT = (local / DIVE_SPLIT) * 0.38;
-      } else {
-        inConnector = true;
-        const connNorm = (local - DIVE_SPLIT) / (1 - DIVE_SPLIT);
-        videoT = 0.38 + easeInOutSine(connNorm) * 0.62;
-      }
+      // Continuous single-clip Google Flow transition (zero mid-clip speed kink!)
+      const videoT = clamp((local - 0.015) / 0.94, 0, 0.996);
+      connectorIntensity = clamp((local - 0.55) / 0.45, 0, 1);
+
       this.drawMultiPlaneScene(sceneIdx, 1.03, panX, panY, 1, diveKey, videoT);
+
+      // Smooth cross-dissolve over final 16% into Scene i+1 when Scene i+1 uses a still image
+      // so there is zero aspect-ratio / scale jump when timeline crosses (sceneIdx + 1).000
+      if (!hasNextDiveVid && local > 0.84) {
+        const blendNext = easeInOutSine(clamp((local - 0.84) / 0.16, 0, 1));
+        this.drawMultiPlaneScene(sceneIdx + 1, START_SCALE, panX, panY, blendNext);
+      }
     } else if (local <= DIVE_SPLIT) {
       const diveNorm = local / DIVE_SPLIT;
       const eased = easeInOutSine(diveNorm);
@@ -684,12 +742,15 @@ export class ScrollWorldEngine {
       this.drawMultiPlaneScene(sceneIdx, scale, panX, panY, 1, diveKey, diveNorm);
     } else {
       // Seamless Multi-Plane Portal Connector (Seam-Rule locked)
-      inConnector = true;
       const connNorm = (local - DIVE_SPLIT) / (1 - DIVE_SPLIT);
+      connectorIntensity = Math.sin(connNorm * Math.PI);
 
       if (hasConnVid) {
-        // True oso95/scroll-world boundary-matched connector clip (firstFrame -> lastFrame)
         this.drawMultiPlaneScene(sceneIdx, 1.03, panX, panY, 1, connKey, connNorm);
+        if (!hasNextDiveVid && connNorm > 0.8) {
+          const blendNext = easeInOutSine(clamp((connNorm - 0.8) / 0.2, 0, 1));
+          this.drawMultiPlaneScene(sceneIdx + 1, START_SCALE, panX, panY, blendNext);
+        }
       } else {
         const eased = easeInOutCubic(connNorm);
 
@@ -704,9 +765,11 @@ export class ScrollWorldEngine {
     }
 
     // Live Hero Intro Video layer that melts seamlessly into scroll-world on scroll
-    this.renderHeroIntroBlend(elapsed, timeline, panX, panY);
+    if (sceneIdx === 0) {
+      this.renderHeroIntroBlend(elapsed, timeline, panX, panY);
+    }
 
-    this.draw3DCADAndParticles(elapsed, inConnector);
+    this.draw3DCADAndParticles(elapsed, connectorIntensity, timeline, hasActiveVideo);
   }
 
   private syncDOM(elapsed: number): void {
@@ -723,14 +786,17 @@ export class ScrollWorldEngine {
 
     // 1. Beat 00 (Hero) Diagonal Shutter & Copy Portal Choreography
     const heroTimeline = clamp(timeline, 0, 1); // 0..1 across Beat 00
+    const isDesktopHero = this.logicalWidth >= 960;
     if (this.heroShutterEl) {
       if (this.reducedMotion) {
         this.heroShutterEl.style.opacity = activeIdx === 0 ? '1' : '0';
       } else {
-        const shutterExit = clamp((heroTimeline - 0.14) / 0.68, 0, 1);
+        const shutterExit = clamp((heroTimeline - 0.04) / 0.52, 0, 1);
         const easedShutter = easeInOutCubic(shutterExit);
         this.heroShutterEl.style.opacity = (1 - easedShutter).toFixed(3);
-        this.heroShutterEl.style.transform = `translate3d(${(-easedShutter * 62).toFixed(1)}%, 0, 0) skewX(${(-easedShutter * 7).toFixed(2)}deg)`;
+        this.heroShutterEl.style.transform = isDesktopHero
+          ? `translate3d(${(-easedShutter * 36).toFixed(1)}%, 0, 0)`
+          : `translate3d(0, ${(easedShutter * 16).toFixed(1)}%, 0)`;
       }
     }
 
@@ -740,16 +806,14 @@ export class ScrollWorldEngine {
         this.heroCopyEl.style.opacity = showHero ? '1' : '0';
         this.heroCopyEl.style.pointerEvents = showHero ? 'auto' : 'none';
       } else {
-        const copyExit = clamp((heroTimeline - 0.06) / 0.58, 0, 1);
+        const copyExit = clamp((heroTimeline - 0.03) / 0.46, 0, 1);
         const easedCopy = easeInOutSine(copyExit);
         const alpha = 1 - easedCopy;
-        const scale = 1 + easedCopy * 0.09;
-        const shiftX = -easedCopy * 44;
-        const shiftY = -easedCopy * 24;
+        const scale = 1 + easedCopy * 0.05;
+        const shiftX = isDesktopHero ? -easedCopy * 36 : 0;
+        const shiftY = isDesktopHero ? -easedCopy * 18 : easedCopy * 24;
         this.heroCopyEl.style.opacity = alpha.toFixed(3);
         this.heroCopyEl.style.transform = `translate3d(${shiftX.toFixed(1)}px, ${shiftY.toFixed(1)}px, 0) scale(${scale.toFixed(3)})`;
-        this.heroCopyEl.style.filter =
-          easedCopy > 0.05 ? `blur(${(easedCopy * 7).toFixed(1)}px)` : 'none';
         this.heroCopyEl.style.pointerEvents = 'none';
         this.heroCopyEl.setAttribute('aria-hidden', alpha > 0.2 ? 'false' : 'true');
       }
