@@ -4,29 +4,157 @@ import "../styles/global.css";
 interface Props {
   title?: string;
   description?: string;
+  canonical?: string;
+  ogImage?: string;
 }
+
+const SITE_URL = "https://360solucionespro.com";
 
 const {
   title = "360° Pro Soluciones Integrales S.A.S. | Arquitectura, Obras Civiles, Mantenimiento y Consultoría en Villavicencio",
-  description = "Soluciones integrales en Villavicencio, Meta — Arquitectura e Ingeniería Civil, Construcción y Obras Civiles, Mantenimiento, Publicidad y Artes Gráficas, Suministros, Logística y Consultoría Técnica y Ambiental. Un solo aliado para múltiples soluciones.",
+  description = "Soluciones integrales en Villavicencio, Meta y toda Colombia — Arquitectura e Ingeniería Civil, Construcción y Obras Civiles, Mantenimiento, Publicidad y Artes Gráficas, Suministros, Logística y Consultoría Técnica y Ambiental. Un solo aliado para múltiples soluciones.",
+  canonical,
+  ogImage = `${SITE_URL}/images/hero-main.jpg`,
 } = Astro.props;
+
+const canonicalURL =
+  canonical ?? new URL(Astro.url.pathname, Astro.site ?? SITE_URL).toString();
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "360° Pro Soluciones Integrales S.A.S.",
-  slogan: "Un solo aliado para múltiples soluciones.",
-  description,
-  email: "360psi.sas@gmail.com",
-  telephone: "+57-301-540-9222",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Carrera 17 N.º 32A-03, Urbanización El Bosque",
-    addressLocality: "Villavicencio",
-    addressRegion: "Meta",
-    addressCountry: "CO",
-  },
-  areaServed: ["Villavicencio", "Meta", "Orinoquía", "Colombia"],
+  "@graph": [
+    {
+      "@type": ["Organization", "GeneralContractor", "ProfessionalService"],
+      "@id": `${SITE_URL}/#organization`,
+      name: "360° Pro Soluciones Integrales S.A.S.",
+      alternateName: "360° Pro",
+      url: `${SITE_URL}/`,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/brand/logo-360pro@2x.png`,
+        width: 720,
+        height: 192,
+      },
+      image: ogImage,
+      slogan: "Un solo aliado para múltiples soluciones.",
+      description,
+      email: "360psi.sas@gmail.com",
+      telephone: "+57-301-540-9222",
+      priceRange: "$$$",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Carrera 17 N.º 32A-03, Urbanización El Bosque",
+        addressLocality: "Villavicencio",
+        addressRegion: "Meta",
+        postalCode: "500001",
+        addressCountry: "CO",
+      },
+      geo: {
+        "@type": "GeoCoordinates",
+        latitude: 4.142,
+        longitude: -73.6266,
+      },
+      openingHoursSpecification: [
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+          opens: "07:30",
+          closes: "18:00",
+        },
+        {
+          "@type": "OpeningHoursSpecification",
+          dayOfWeek: ["Saturday"],
+          opens: "08:00",
+          closes: "13:00",
+        },
+      ],
+      areaServed: [
+        { "@type": "City", name: "Villavicencio" },
+        { "@type": "AdministrativeArea", name: "Meta" },
+        { "@type": "AdministrativeArea", name: "Orinoquía" },
+        { "@type": "Country", name: "Colombia" },
+      ],
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Portafolio de Soluciones Integrales 360° Pro",
+        itemListElement: [
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Arquitectura e Ingeniería Civil",
+              description:
+                "Diseños arquitectónicos y estudios técnicos de ingeniería civil bajo normativa NSR-10 para proyectos residenciales, comerciales, institucionales e industriales.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Construcción y Obras Civiles",
+              description:
+                "Ejecución integral de obras de construcción, remodelación, ampliación y adecuación de infraestructura pública y privada.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Mantenimiento y Adecuaciones",
+              description:
+                "Mantenimiento preventivo y correctivo en instalaciones físicas, eléctricas, hidrosanitarias y locativas.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Publicidad y Artes Gráficas",
+              description:
+                "Diseño, producción e instalación de piezas publicitarias, señalización corporativa y material gráfico institucional.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Ingeniería Ambiental y Sanitaria",
+              description:
+                "Estudios ambientales, planes de manejo ambiental (PMA), saneamiento básico y gestión integral de residuos.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Suministros y Logística Operativa",
+              description:
+                "Provisión de materiales, insumos, dotación institucional y apoyo logístico para proyectos empresariales y entidades públicas.",
+            },
+          },
+          {
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: "Consultoría y Asesoría Técnica",
+              description:
+                "Formulación, estructuración, evaluación, interventoría y supervisión técnica de proyectos públicos (B2G) y privados (B2B).",
+            },
+          },
+        ],
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}/#website`,
+      url: `${SITE_URL}/`,
+      name: "360° Pro Soluciones Integrales S.A.S.",
+      inLanguage: "es-CO",
+      publisher: {
+        "@id": `${SITE_URL}/#organization`,
+      },
+    },
+  ],
 };
 ---
 
@@ -35,6 +163,7 @@ const structuredData = {
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <link rel="canonical" href={canonicalURL} />
       <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
@@ -48,17 +177,43 @@ const structuredData = {
       <meta name="description" content={description} />
       <meta
         name="keywords"
-        content="Soluciones integrales en Villavicencio, Meta, Arquitectura, Obras Civiles, Construcción, Mantenimiento, Publicidad, Artes Gráficas, Suministros, Logística, Consultoría Ambiental, Interventoría, Licitaciones B2G, 360 Pro Soluciones Integrales"
+        content="Soluciones integrales en Villavicencio, Meta, Arquitectura, Obras Civiles, Construcción, Mantenimiento, Publicidad, Artes Gráficas, Suministros, Logística, Consultoría Ambiental, Interventoría, Licitaciones B2G, Contratación Pública, 360 Pro Soluciones Integrales"
       />
-      <meta name="robots" content="index, follow" />
+      <meta name="author" content="360° Pro Soluciones Integrales S.A.S." />
+      <meta
+        name="robots"
+        content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+      />
       <meta name="theme-color" content="#0A2239" />
 
-      <!-- Open Graph -->
+      <!-- Geolocalización para SEO Local (Villavicencio, Meta, Colombia) -->
+      <meta name="geo.region" content="CO-MET" />
+      <meta name="geo.placename" content="Villavicencio, Meta, Colombia" />
+      <meta name="geo.position" content="4.1420;-73.6266" />
+      <meta name="ICBM" content="4.1420, -73.6266" />
+
+      <!-- Open Graph (WhatsApp, LinkedIn, Facebook) -->
       <meta property="og:type" content="website" />
       <meta property="og:locale" content="es_CO" />
+      <meta property="og:url" content={canonicalURL} />
+      <meta property="og:site_name" content="360° Pro Soluciones Integrales S.A.S." />
       <meta property="og:title" content={title} />
       <meta property="og:description" content={description} />
-      <meta property="og:image" content="/images/hero-main.jpg" />
+      <meta property="og:image" content={ogImage} />
+      <meta property="og:image:secure_url" content={ogImage} />
+      <meta property="og:image:type" content="image/jpeg" />
+      <meta property="og:image:width" content="1920" />
+      <meta property="og:image:height" content="1280" />
+      <meta
+        property="og:image:alt"
+        content="360° Pro Soluciones Integrales S.A.S. — Un solo aliado para múltiples soluciones en arquitectura, ingeniería y construcción"
+      />
+
+      <!-- Twitter / X Cards -->
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={title} />
+      <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={ogImage} />
 
     <!-- Precarga de recursos críticos (LCP) -->
     <link
