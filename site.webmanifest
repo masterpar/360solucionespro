@@ -1,0 +1,22 @@
+{
+  "name": "360° Pro Soluciones Integrales S.A.S.",
+  "short_name": "360° Pro",
+  "description": "Soluciones integrales en arquitectura, ingeniería, construcción, mantenimiento y consultoría técnica en Colombia.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#061524",
+  "theme_color": "#0A2239",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+

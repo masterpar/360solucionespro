@@ -1,0 +1,26 @@
+# 360° Pro Soluciones Integrales - Hostinger Configuration
+DirectoryIndex index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # HTTPS Enforcement (si no viene ya por SSL)
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Servir archivos y carpetas existentes
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Redireccionar rutas limpias a su index.html correspondiente
+  RewriteCond %{DOCUMENT_ROOT}/$1/index.html -f
+  RewriteRule ^(.*)/?$ /$1/index.html [L]
+</IfModule>
+
+# Habilitar compresión Gzip / Brotli
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
